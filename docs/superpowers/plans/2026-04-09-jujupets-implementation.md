@@ -38,6 +38,10 @@
 | `tests/state.test.js` | Tests for save/load and state management |
 | `tests/events.test.js` | Tests for event scheduling and effects |
 | `tests/progression.test.js` | Tests for milestone unlocks |
+| `tests/engine.test.js` | Tests for engine speed control and tick accumulation |
+| `tests/renderer.test.js` | Tests for renderer layout calculations and draw dispatch |
+| `tests/ui.test.js` | Tests for UI formatting logic (date, money, match display) |
+| `tests/integration.test.js` | Tests for full game loop: bootstrap → tick → state changes |
 
 ---
 
@@ -742,11 +746,137 @@ git commit -m "feat: add static game data definitions with species, staff, event
 
 **Files:**
 - Create: `js/engine.js`
+- Create: `tests/engine.test.js`
+- Modify: `test.html`
 
-- [ ] **Step 1: Implement the game engine**
+To make the engine testable without `requestAnimationFrame`, we extract the tick-accumulation logic into a pure `computeTicks(dt, speed, msPerTick, accumulator)` function and test that separately. The rAF loop just calls it.
+
+- [ ] **Step 1: Write engine tests**
+
+```js
+// tests/engine.test.js
+import { describe, it, expect } from '../js/test-runner.js';
+import { createEngine, computeTicks } from '../js/engine.js';
+
+describe('computeTicks', () => {
+  it('returns 0 ticks when dt is less than msPerTick', () => {
+    const result = computeTicks(100, 1, 250, 0);
+    expect(result.ticks).toBe(0);
+    expect(result.accumulator).toBe(100);
+  });
+
+  it('returns 1 tick when dt equals msPerTick', () => {
+    const result = computeTicks(250, 1, 250, 0);
+    expect(result.ticks).toBe(1);
+    expect(result.accumulator).toBe(0);
+  });
+
+  it('returns 2 ticks when dt is double msPerTick', () => {
+    const result = computeTicks(500, 1, 250, 0);
+    expect(result.ticks).toBe(2);
+    expect(result.accumulator).toBe(0);
+  });
+
+  it('accumulates remainder across calls', () => {
+    const r1 = computeTicks(100, 1, 250, 0);
+    expect(r1.ticks).toBe(0);
+    expect(r1.accumulator).toBe(100);
+    const r2 = computeTicks(200, 1, 250, r1.accumulator);
+    expect(r2.ticks).toBe(1);
+    expect(r2.accumulator).toBe(50);
+  });
+
+  it('multiplies dt by speed', () => {
+    const result = computeTicks(125, 2, 250, 0);
+    expect(result.ticks).toBe(1);
+    expect(result.accumulator).toBe(0);
+  });
+
+  it('returns 0 ticks at speed 0', () => {
+    const result = computeTicks(1000, 0, 250, 0);
+    expect(result.ticks).toBe(0);
+    expect(result.accumulator).toBe(0);
+  });
+
+  it('speed 3 triples effective dt', () => {
+    const result = computeTicks(250, 3, 250, 0);
+    expect(result.ticks).toBe(3);
+    expect(result.accumulator).toBe(0);
+  });
+});
+
+describe('createEngine', () => {
+  it('starts with running false', () => {
+    const engine = createEngine();
+    expect(engine.running).toBe(false);
+  });
+
+  it('defaults to speed 1', () => {
+    const engine = createEngine();
+    expect(engine.getSpeed()).toBe(1);
+  });
+
+  it('clamps speed to 0-3', () => {
+    const engine = createEngine();
+    engine.setSpeed(-1);
+    expect(engine.getSpeed()).toBe(0);
+    engine.setSpeed(5);
+    expect(engine.getSpeed()).toBe(3);
+    engine.setSpeed(2);
+    expect(engine.getSpeed()).toBe(2);
+  });
+
+  it('sets running to true after start', () => {
+    const engine = createEngine();
+    engine.start();
+    expect(engine.running).toBe(true);
+    engine.stop();
+  });
+
+  it('sets running to false after stop', () => {
+    const engine = createEngine();
+    engine.start();
+    engine.stop();
+    expect(engine.running).toBe(false);
+  });
+});
+```
+
+- [ ] **Step 2: Add import to test.html**
+
+```html
+<script type="module">
+  import './tests/data.test.js';
+  import './tests/state.test.js';
+  import './tests/engine.test.js';
+  import { runAll } from './js/test-runner.js';
+  runAll();
+</script>
+```
+
+- [ ] **Step 3: Run tests to verify they fail**
+
+Run: Refresh `http://localhost:8080/test.html`
+Expected: Import error — `js/engine.js` does not export `computeTicks`.
+
+- [ ] **Step 4: Implement js/engine.js**
 
 ```js
 // js/engine.js
+
+// Pure function — testable without rAF
+export function computeTicks(dt, speed, msPerTick, accumulator) {
+  if (speed === 0) {
+    return { ticks: 0, accumulator: 0 };
+  }
+  accumulator += dt * speed;
+  let ticks = 0;
+  while (accumulator >= msPerTick) {
+    accumulator -= msPerTick;
+    ticks++;
+  }
+  return { ticks, accumulator };
+}
 
 export function createEngine() {
   let running = false;
@@ -776,14 +906,10 @@ export function createEngine() {
     lastTime = timestamp;
 
     if (speed > 0 && onTick) {
-      tickAccumulator += dt * speed;
-      let ticks = 0;
-      while (tickAccumulator >= msPerTick) {
-        tickAccumulator -= msPerTick;
-        ticks++;
-      }
-      if (ticks > 0) {
-        onTick(ticks);
+      const result = computeTicks(dt, speed, msPerTick, tickAccumulator);
+      tickAccumulator = result.accumulator;
+      if (result.ticks > 0) {
+        onTick(result.ticks);
       }
     }
 
@@ -823,21 +949,16 @@ export function createEngine() {
 }
 ```
 
-- [ ] **Step 2: Verify engine loads without errors**
+- [ ] **Step 5: Run tests to verify they pass**
 
-Run: Temporarily import in `js/main.js`:
-```js
-import { createEngine } from './engine.js';
-const engine = createEngine();
-console.log("Engine created, running:", engine.running);
-```
-Open `http://localhost:8080` — console should show "Engine created, running: false".
+Run: Refresh `http://localhost:8080/test.html`
+Expected: All engine tests green.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add js/engine.js js/main.js
-git commit -m "feat: add game engine with rAF loop and speed control"
+git add js/engine.js tests/engine.test.js test.html
+git commit -m "feat: add game engine with testable tick accumulation and speed control"
 ```
 
 ---
@@ -2344,8 +2465,74 @@ git commit -m "feat: add simulation orchestrator combining all game systems"
 
 **Files:**
 - Create: `js/renderer.js`
+- Create: `tests/renderer.test.js`
+- Modify: `test.html`
 
-- [ ] **Step 1: Implement the canvas renderer**
+To make the renderer testable, we extract `calculateLayout(width, height, maxAnimals)` as a pure function that returns enclosure positions and sizes. The actual Canvas draw calls remain untested (visual verification), but the layout math is covered.
+
+- [ ] **Step 1: Write renderer layout tests**
+
+```js
+// tests/renderer.test.js
+import { describe, it, expect } from '../js/test-runner.js';
+import { calculateLayout } from '../js/renderer.js';
+
+describe('calculateLayout', () => {
+  it('returns correct number of enclosures for maxAnimals 6', () => {
+    const layout = calculateLayout(480, 320, 6);
+    expect(layout.enclosures.length).toBe(6);
+  });
+
+  it('arranges in 3 columns and 2 rows', () => {
+    const layout = calculateLayout(480, 320, 6);
+    // First row: col 0,1,2
+    expect(layout.enclosures[0].col).toBe(0);
+    expect(layout.enclosures[1].col).toBe(1);
+    expect(layout.enclosures[2].col).toBe(2);
+    // Second row
+    expect(layout.enclosures[3].col).toBe(0);
+    expect(layout.enclosures[3].row).toBe(1);
+  });
+
+  it('enclosures have positive width and height', () => {
+    const layout = calculateLayout(480, 320, 6);
+    for (const enc of layout.enclosures) {
+      expect(enc.w).toBeGreaterThan(0);
+      expect(enc.h).toBeGreaterThan(0);
+    }
+  });
+
+  it('enclosures do not exceed canvas bounds', () => {
+    const layout = calculateLayout(480, 320, 6);
+    for (const enc of layout.enclosures) {
+      expect(enc.x + enc.w <= 480).toBeTruthy();
+      expect(enc.y + enc.h <= 320).toBeTruthy();
+    }
+  });
+
+  it('staff area starts below enclosures', () => {
+    const layout = calculateLayout(480, 320, 6);
+    const lastEncBottom = Math.max(...layout.enclosures.map(e => e.y + e.h));
+    expect(layout.staffAreaY).toBeGreaterThan(lastEncBottom - 1);
+  });
+
+  it('caps at 6 enclosures even if maxAnimals is higher', () => {
+    const layout = calculateLayout(480, 320, 10);
+    expect(layout.enclosures.length).toBe(6);
+  });
+});
+```
+
+- [ ] **Step 2: Add import to test.html**
+
+Add `import './tests/renderer.test.js';` to the test imports in `test.html`.
+
+- [ ] **Step 3: Run tests to verify they fail**
+
+Run: Refresh `http://localhost:8080/test.html`
+Expected: Import error — `js/renderer.js` does not export `calculateLayout`.
+
+- [ ] **Step 4: Implement js/renderer.js**
 
 ```js
 // js/renderer.js
@@ -2364,60 +2551,78 @@ const STAFF_COLOR = '#5070c0';
 const ENCLOSURE_BG = '#3a3a5a';
 const ENCLOSURE_BORDER = '#555';
 const FLOOR_COLOR = '#2a2a4a';
+const COLS = 3;
+const ROWS = 2;
+const PADDING = 8;
+
+// Pure function — testable without Canvas
+export function calculateLayout(canvasW, canvasH, maxAnimals) {
+  const encW = Math.floor((canvasW - PADDING * (COLS + 1)) / COLS);
+  const encH = Math.floor((canvasH - 60 - PADDING * (ROWS + 1)) / ROWS);
+  const count = Math.min(maxAnimals, COLS * ROWS);
+  const enclosures = [];
+  for (let i = 0; i < count; i++) {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    enclosures.push({
+      x: PADDING + col * (encW + PADDING),
+      y: PADDING + row * (encH + PADDING),
+      w: encW,
+      h: encH,
+      col,
+      row,
+    });
+  }
+  return {
+    enclosures,
+    staffAreaY: PADDING + (encH + PADDING) * ROWS,
+  };
+}
 
 export function createRenderer(canvas) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width;   // 480
   const H = canvas.height;  // 320
 
-  // Grid layout: 3 columns, 2 rows of enclosures + bottom staff area
-  const COLS = 3;
-  const ROWS = 2;
-  const PADDING = 8;
-  const ENCLOSURE_W = Math.floor((W - PADDING * (COLS + 1)) / COLS);
-  const ENCLOSURE_H = Math.floor((H - 60 - PADDING * (ROWS + 1)) / ROWS); // 60px for staff bar
-  const STAFF_AREA_Y = PADDING + (ENCLOSURE_H + PADDING) * ROWS;
-
   function render(state) {
+    const layout = calculateLayout(W, H, state.maxAnimals);
+
     // Clear
     ctx.fillStyle = FLOOR_COLOR;
     ctx.fillRect(0, 0, W, H);
 
     // Draw enclosures
-    for (let i = 0; i < state.maxAnimals && i < COLS * ROWS; i++) {
-      const col = i % COLS;
-      const row = Math.floor(i / COLS);
-      const x = PADDING + col * (ENCLOSURE_W + PADDING);
-      const y = PADDING + row * (ENCLOSURE_H + PADDING);
+    for (let i = 0; i < layout.enclosures.length; i++) {
+      const { x, y, w, h } = layout.enclosures[i];
 
       // Enclosure background
       ctx.fillStyle = ENCLOSURE_BG;
-      ctx.fillRect(x, y, ENCLOSURE_W, ENCLOSURE_H);
+      ctx.fillRect(x, y, w, h);
       ctx.strokeStyle = ENCLOSURE_BORDER;
-      ctx.strokeRect(x, y, ENCLOSURE_W, ENCLOSURE_H);
+      ctx.strokeRect(x, y, w, h);
 
       const animal = state.animals[i];
       if (animal) {
-        drawAnimal(ctx, animal, x, y, ENCLOSURE_W, ENCLOSURE_H);
+        drawAnimal(ctx, animal, x, y, w, h);
       } else {
         // Empty enclosure
         ctx.fillStyle = '#555';
         ctx.font = '10px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('Leer', x + ENCLOSURE_W / 2, y + ENCLOSURE_H / 2);
+        ctx.fillText('Leer', x + w / 2, y + h / 2);
       }
     }
 
     // Draw staff area
     ctx.fillStyle = '#1a1a3e';
-    ctx.fillRect(0, STAFF_AREA_Y, W, H - STAFF_AREA_Y);
+    ctx.fillRect(0, layout.staffAreaY, W, H - layout.staffAreaY);
     ctx.strokeStyle = ENCLOSURE_BORDER;
     ctx.beginPath();
-    ctx.moveTo(0, STAFF_AREA_Y);
-    ctx.lineTo(W, STAFF_AREA_Y);
+    ctx.moveTo(0, layout.staffAreaY);
+    ctx.lineTo(W, layout.staffAreaY);
     ctx.stroke();
 
-    drawStaff(ctx, state.staff, STAFF_AREA_Y);
+    drawStaff(ctx, state.staff, layout.staffAreaY);
   }
 
   function drawAnimal(ctx, animal, x, y, w, h) {
@@ -2504,7 +2709,12 @@ export function createRenderer(canvas) {
 }
 ```
 
-- [ ] **Step 2: Verify renderer loads without errors**
+- [ ] **Step 5: Run tests to verify they pass**
+
+Run: Refresh `http://localhost:8080/test.html`
+Expected: All renderer layout tests green.
+
+- [ ] **Step 6: Verify renderer visually**
 
 Add temporary code to `js/main.js`:
 ```js
@@ -2529,11 +2739,11 @@ console.log("Renderer test: drawn", state.animals.length, "animals");
 Run: Open `http://localhost:8080`
 Expected: Canvas shows 2 enclosures with colored square "animals" + names + health bars, one staff member in the bottom area. 4 empty enclosures shown.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add js/renderer.js js/main.js
-git commit -m "feat: add canvas renderer with placeholder pixel-art for animals and staff"
+git add js/renderer.js tests/renderer.test.js test.html js/main.js
+git commit -m "feat: add canvas renderer with testable layout and placeholder pixel-art"
 ```
 
 ---
@@ -2542,13 +2752,106 @@ git commit -m "feat: add canvas renderer with placeholder pixel-art for animals 
 
 **Files:**
 - Create: `js/ui.js`
+- Create: `tests/ui.test.js`
+- Modify: `test.html`
 
-- [ ] **Step 1: Implement the UI module**
+To make the UI testable, we extract pure formatting functions: `formatMoney(amount)`, `formatDate(time)`, `formatStaffEntry(staff, animals)`, `formatApplicantEntry(owner, animals)`. The DOM manipulation stays in `createUI` (visually verified), but the data→string logic is tested.
+
+- [ ] **Step 1: Write UI formatting tests**
+
+```js
+// tests/ui.test.js
+import { describe, it, expect } from '../js/test-runner.js';
+import { formatMoney, formatDate, formatStaffEntry } from '../js/ui.js';
+
+describe('formatMoney', () => {
+  it('formats positive amounts with $ prefix', () => {
+    expect(formatMoney(1234)).toBe('$1.234');
+  });
+
+  it('formats zero', () => {
+    expect(formatMoney(0)).toBe('$0');
+  });
+
+  it('formats negative amounts (debt)', () => {
+    expect(formatMoney(-500)).toBe('-$500');
+  });
+});
+
+describe('formatDate', () => {
+  it('formats year 1, month 1, week 1', () => {
+    const result = formatDate({ year: 1, month: 1, week: 1, day: 1, tick: 0 });
+    expect(result).toBe('Jahr 1 - Jan W1');
+  });
+
+  it('formats month 6 correctly', () => {
+    const result = formatDate({ year: 3, month: 6, week: 2, day: 3, tick: 5 });
+    expect(result).toBe('Jahr 3 - Jun W2');
+  });
+
+  it('formats month 12 correctly', () => {
+    const result = formatDate({ year: 20, month: 12, week: 4, day: 7, tick: 0 });
+    expect(result).toBe('Jahr 20 - Dez W4');
+  });
+});
+
+describe('formatStaffEntry', () => {
+  it('shows role, name, level, energy, and assignment', () => {
+    const staff = { id: 1, role: 'caretaker', name: 'Max', level: 3, energy: 80, assignedAnimalId: 5 };
+    const animals = [{ id: 5, name: 'Buddy' }];
+    const result = formatStaffEntry(staff, animals);
+    expect(result).toContain('Pfleger');
+    expect(result).toContain('Max');
+    expect(result).toContain('Lv.3');
+    expect(result).toContain('80%');
+    expect(result).toContain('Buddy');
+  });
+
+  it('shows dash when not assigned', () => {
+    const staff = { id: 1, role: 'vet', name: 'Mia', level: 1, energy: 100, assignedAnimalId: null };
+    const result = formatStaffEntry(staff, []);
+    expect(result).toContain('-');
+  });
+});
+```
+
+- [ ] **Step 2: Add import to test.html**
+
+Add `import './tests/ui.test.js';` to the test imports in `test.html`.
+
+- [ ] **Step 3: Run tests to verify they fail**
+
+Run: Refresh `http://localhost:8080/test.html`
+Expected: Import error — `js/ui.js` does not export `formatMoney`, `formatDate`, `formatStaffEntry`.
+
+- [ ] **Step 4: Implement js/ui.js**
 
 ```js
 // js/ui.js
 import { SPECIES, STAFF_ROLES, BALANCING } from './data.js';
 import { calculateMatchScore } from './matching.js';
+
+const MONTH_NAMES = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+
+// Pure formatting functions — testable without DOM
+export function formatMoney(amount) {
+  if (amount < 0) return `-$${Math.abs(amount).toLocaleString('de-DE')}`;
+  return `$${amount.toLocaleString('de-DE')}`;
+}
+
+export function formatDate(time) {
+  const monthName = MONTH_NAMES[time.month - 1] || "???";
+  return `Jahr ${time.year} - ${monthName} W${time.week}`;
+}
+
+export function formatStaffEntry(staff, animals) {
+  const role = STAFF_ROLES[staff.role];
+  const energyPct = Math.floor(staff.energy);
+  const assigned = staff.assignedAnimalId !== null
+    ? animals.find(a => a.id === staff.assignedAnimalId)?.name || '?'
+    : '-';
+  return `${role.name} ${staff.name} Lv.${staff.level} | E:${energyPct}% | → ${assigned}`;
+}
 
 export function createUI(state, callbacks) {
   const elements = {
@@ -2582,24 +2885,16 @@ export function createUI(state, callbacks) {
     });
   });
 
-  const MONTH_NAMES = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-
   function update(state) {
     // Stats bar
-    elements.money.textContent = `$${state.money.toLocaleString('de-DE')}`;
+    elements.money.textContent = formatMoney(state.money);
     elements.reputation.textContent = `Rep: ${state.reputation}`;
-    const monthName = MONTH_NAMES[state.time.month - 1] || "???";
-    elements.date.textContent = `Jahr ${state.time.year} - ${monthName} W${state.time.week}`;
+    elements.date.textContent = formatDate(state.time);
 
     // Staff list
-    elements.staffList.innerHTML = state.staff.map(s => {
-      const energyPct = Math.floor(s.energy);
-      const role = STAFF_ROLES[s.role];
-      const assigned = s.assignedAnimalId !== null
-        ? state.animals.find(a => a.id === s.assignedAnimalId)?.name || '?'
-        : '-';
-      return `<div class="staff-entry">${role.name} ${s.name} Lv.${s.level} | E:${energyPct}% | → ${assigned}</div>`;
-    }).join('');
+    elements.staffList.innerHTML = state.staff.map(s =>
+      `<div class="staff-entry">${formatStaffEntry(s, state.animals)}</div>`
+    ).join('');
 
     // Applicant list
     elements.applicantList.innerHTML = state.owners.map(o => {
@@ -2640,15 +2935,20 @@ export function createUI(state, callbacks) {
 }
 ```
 
-- [ ] **Step 2: Verify UI module loads**
+- [ ] **Step 5: Run tests to verify they pass**
 
-Run: Open `http://localhost:8080` — no console errors. (UI not wired yet — that's next task.)
+Run: Refresh `http://localhost:8080/test.html`
+Expected: All UI formatting tests green.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 6: Verify UI module loads in game**
+
+Run: Open `http://localhost:8080` — no console errors.
+
+- [ ] **Step 7: Commit**
 
 ```bash
-git add js/ui.js
-git commit -m "feat: add UI system for DOM overlays, stats, dialogs, and action buttons"
+git add js/ui.js tests/ui.test.js test.html
+git commit -m "feat: add UI system with testable formatting and DOM overlay management"
 ```
 
 ---
@@ -2657,8 +2957,88 @@ git commit -m "feat: add UI system for DOM overlays, stats, dialogs, and action 
 
 **Files:**
 - Modify: `js/main.js`
+- Create: `tests/integration.test.js`
+- Modify: `test.html`
 
-- [ ] **Step 1: Implement the main bootstrap**
+Before wiring up the full game, we write integration tests that verify the core loop works end-to-end without Canvas/DOM: create a state, add animals/staff, run simulation ticks, and assert that state changes correctly.
+
+- [ ] **Step 1: Write integration tests**
+
+```js
+// tests/integration.test.js
+import { describe, it, expect } from '../js/test-runner.js';
+import { createNewState } from '../js/state.js';
+import { createAnimal } from '../js/animals.js';
+import { createStaff, assignStaff } from '../js/staff.js';
+import { simulateTick } from '../js/simulation.js';
+import { createOwner, calculateMatchScore, executeAdoption } from '../js/matching.js';
+
+describe('Integration: full game loop', () => {
+  it('animal needs decrease over multiple ticks', () => {
+    const state = createNewState();
+    const animal = createAnimal('dog', state.nextId++);
+    animal.needs.food = 1.0;
+    state.animals.push(animal);
+    for (let i = 0; i < 10; i++) simulateTick(state);
+    expect(state.animals[0].needs.food).toBeLessThan(1.0);
+  });
+
+  it('assigned caretaker restores animal needs', () => {
+    const state = createNewState();
+    const animal = createAnimal('dog', state.nextId++);
+    animal.needs.food = 0.2;
+    state.animals.push(animal);
+    const staff = createStaff('caretaker', state.nextId++);
+    assignStaff(staff, animal.id);
+    state.staff.push(staff);
+    for (let i = 0; i < 5; i++) simulateTick(state);
+    expect(state.animals[0].needs.food).toBeGreaterThan(0.2);
+  });
+
+  it('adoption removes animal and adds money', () => {
+    const state = createNewState();
+    const animal = createAnimal('dog', state.nextId++);
+    animal.stats = { health: 1, happiness: 1, training: 1, social: 1 };
+    state.animals.push(animal);
+    const owner = createOwner(state.nextId++);
+    owner.preferences = { ...animal.personality };
+    state.owners.push(owner);
+    const score = calculateMatchScore(animal, owner, 0);
+    const moneyBefore = state.money;
+    executeAdoption(state, animal, owner, score);
+    expect(state.animals.length).toBe(0);
+    expect(state.money).toBeGreaterThan(moneyBefore);
+  });
+
+  it('time advances correctly over many ticks', () => {
+    const state = createNewState();
+    // 24 ticks = 1 day, 7 days = 1 week, 4 weeks = 1 month
+    const ticksPerMonth = 24 * 7 * 4;
+    for (let i = 0; i < ticksPerMonth; i++) simulateTick(state);
+    expect(state.time.month).toBeGreaterThan(1);
+  });
+
+  it('money decreases from food costs with animals', () => {
+    const state = createNewState();
+    state.animals.push(createAnimal('dog', state.nextId++));
+    const moneyBefore = state.money;
+    // Simulate enough ticks for one day (24 ticks)
+    for (let i = 0; i < 24; i++) simulateTick(state);
+    expect(state.money).toBeLessThan(moneyBefore);
+  });
+});
+```
+
+- [ ] **Step 2: Add import to test.html**
+
+Add `import './tests/integration.test.js';` to the test imports in `test.html`.
+
+- [ ] **Step 3: Run integration tests to verify they pass**
+
+Run: Refresh `http://localhost:8080/test.html`
+Expected: All integration tests green (these test already-implemented modules together).
+
+- [ ] **Step 4: Implement the main bootstrap**
 
 ```js
 // js/main.js
@@ -2930,16 +3310,16 @@ if (state.animals.length === 0 && state.staff.length === 0) {
 engine.start();
 ```
 
-- [ ] **Step 2: Verify the game runs end-to-end**
+- [ ] **Step 5: Verify the game runs end-to-end**
 
 Run: Open `http://localhost:8080`
 Expected: Game starts with 2 animals (dog + cat) and 1 caretaker. Stats bar shows $2000, Rep: 10, Year 1. Time advances. Animals' health bars slowly decrease. Side panel shows staff. Action buttons open dialogs. Speed buttons work.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add js/main.js
-git commit -m "feat: wire all systems together in main bootstrap — game is playable"
+git add js/main.js tests/integration.test.js test.html
+git commit -m "feat: wire all systems together with integration tests — game is playable"
 ```
 
 ---
@@ -3022,6 +3402,8 @@ git commit -m "docs: add CLAUDE.md with project guidance for Claude Code"
 
 **Placeholder scan:** No TBD/TODO found. All code blocks are complete.
 
+**TDD coverage:** All 14 tasks use TDD. Tasks 3 (engine), 11 (renderer), and 12 (UI) extract testable pure functions (`computeTicks`, `calculateLayout`, `formatMoney`/`formatDate`/`formatStaffEntry`). Task 13 adds integration tests verifying the full game loop without DOM/Canvas.
+
 **Type consistency:**
 - `createAnimal(speciesKey, id)` — consistent across animals.js, matching.js, events.js, main.js
 - `createStaff(roleKey, id)` — consistent across staff.js, main.js
@@ -3029,3 +3411,6 @@ git commit -m "docs: add CLAUDE.md with project guidance for Claude Code"
 - `simulateTick(state)` — consistent between simulation.js and main.js
 - `calculateMatchScore(animal, owner, matchmakerBonus)` — consistent across matching.js, ui.js, main.js
 - `executeAdoption(state, animal, owner, matchScore)` — consistent across matching.js, main.js
+- `computeTicks(dt, speed, msPerTick, accumulator)` — exported from engine.js, used internally and in tests
+- `calculateLayout(canvasW, canvasH, maxAnimals)` — exported from renderer.js, used internally and in tests
+- `formatMoney(amount)`, `formatDate(time)`, `formatStaffEntry(staff, animals)` — exported from ui.js, used internally and in tests
