@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JujuPets</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game-container">
+    <div id="stats-bar">
+      <span id="stat-money">$0</span>
+      <span id="stat-reputation">Rep: 0</span>
+      <span id="stat-date">Jahr 1 - Jan W1</span>
+      <div id="speed-controls">
+        <button data-speed="0" class="speed-btn">⏸</button>
+        <button data-speed="1" class="speed-btn active">▶</button>
+        <button data-speed="2" class="speed-btn">▶▶</button>
+        <button data-speed="3" class="speed-btn">▶▶▶</button>
+      </div>
+    </div>
+    <div id="main-area">
+      <canvas id="shelter-canvas" width="480" height="320"></canvas>
+      <div id="side-panel">
+        <div id="panel-staff" class="panel-section">
+          <h3>Personal</h3>
+          <div id="staff-list"></div>
+        </div>
+        <div id="panel-applicants" class="panel-section">
+          <h3>Bewerber</h3>
+          <div id="applicant-list"></div>
+        </div>
+        <div id="panel-actions" class="panel-section">
+          <button class="action-btn" data-action="intake">Aufnehmen</button>
+          <button class="action-btn" data-action="adopt">Vermitteln</button>
+          <button class="action-btn" data-action="shop">Einkaufen</button>
+          <button class="action-btn" data-action="staff">Personal</button>
+        </div>
+      </div>
+    </div>
+    <div id="event-ticker"></div>
+  </div>
+  <div id="dialog-overlay" class="hidden">
+    <div id="dialog-box">
+      <h3 id="dialog-title"></h3>
+      <div id="dialog-content"></div>
+      <div id="dialog-buttons"></div>
+    </div>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

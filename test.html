@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>JujuPets Tests</title>
+  <style>
+    body { background: #1a1a2e; color: #eee; font-family: monospace; padding: 20px; }
+    h1 { color: #ffd700; }
+    details { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>JujuPets Test Suite</h1>
+  <h2 id="test-header">Running...</h2>
+  <div id="test-results"></div>
+  <script type="module">
+    // Test module imports go here (must be before runAll)
+    import { runAll } from './js/test-runner.js';
+    runAll();
+  </script>
+</body>
+</html>
