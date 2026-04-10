@@ -2,6 +2,7 @@ import { createEngine } from './engine.js';
 import { createNewState, loadState, saveState } from './state.js';
 import { createRenderer } from './renderer.js';
 import { createTileMap } from './tilemap.js';
+import { createMovementSystem } from './movement.js';
 import { createCamera } from './camera.js';
 import { createUI } from './ui.js';
 import { simulateTick } from './simulation.js';
@@ -14,7 +15,8 @@ import { worldToScreen, TILE_W, TILE_H } from './iso.js';
 
 const canvas = document.getElementById('shelter-canvas');
 const tileMap = createTileMap();
-const renderer = createRenderer(canvas, tileMap);
+const movementSystem = createMovementSystem(tileMap);
+const renderer = createRenderer(canvas, tileMap, movementSystem);
 const worldSize = renderer.getWorldSize();
 const camera = createCamera(canvas.width, canvas.height, worldSize.w, worldSize.h);
 
@@ -69,7 +71,7 @@ engine.onTick = (ticks) => {
   if (keys['d'] || keys['arrowright']) camera.move(scrollSpeed, 0);
 
   for (let i = 0; i < ticks; i++) {
-    simulateTick(state);
+    simulateTick(state, movementSystem);
   }
   autoSaveCounter += ticks;
   if (autoSaveCounter > BALANCING.ticksPerDay * 7) {
@@ -111,6 +113,7 @@ function showIntakeDialog() {
       state.money -= cost;
       const animal = createAnimal(key, state.nextId++);
       state.animals.push(animal);
+      movementSystem.initAnimal(animal);
       state.tickerMessages.push(`${animal.name} (${SPECIES[key].name}) aufgenommen!`);
       ui.hideDialog();
     });
@@ -210,6 +213,7 @@ function showStaffDialog() {
       const roleKey = btn.dataset.hire;
       const staff = createStaff(roleKey, state.nextId++);
       state.staff.push(staff);
+      movementSystem.initStaff(staff);
       state.tickerMessages.push(`${STAFF_ROLES[roleKey].name} ${staff.name} eingestellt!`);
       ui.hideDialog();
       showStaffDialog();
@@ -251,3 +255,6 @@ if (state.animals.length === 0 && state.staff.length === 0) {
 }
 
 engine.start();
+
+for (const animal of state.animals) movementSystem.initAnimal(animal);
+for (const staff of state.staff) movementSystem.initStaff(staff);

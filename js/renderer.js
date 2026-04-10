@@ -12,7 +12,7 @@ const SPECIES_ZONE_MAP = {
   bird: 'birdAviary',
 };
 
-export function createRenderer(canvas, tileMap) {
+export function createRenderer(canvas, tileMap, movementSystem) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;
@@ -113,7 +113,7 @@ export function createRenderer(canvas, tileMap) {
 
     // Animals
     for (const animal of state.animals) {
-      const pos = getAnimalPosition(animal);
+      const pos = (movementSystem && movementSystem.getPosition(animal.id)) || getAnimalPosition(animal);
       const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
       const sx = screen.x + mapOffsetX - camera.x + TILE_W / 2 - ANIMAL_SPRITE.W / 2;
       const sy = screen.y + mapOffsetY - camera.y - ANIMAL_SPRITE.H + TILE_H / 2;
@@ -140,7 +140,7 @@ export function createRenderer(canvas, tileMap) {
 
     // Staff
     for (const staff of state.staff) {
-      const pos = getStaffPosition(staff, state);
+      const pos = (movementSystem && movementSystem.getPosition(staff.id)) || getStaffPosition(staff, state);
       const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
       const sx = screen.x + mapOffsetX - camera.x + TILE_W / 2 - STAFF_SPRITE.W / 2;
       const sy = screen.y + mapOffsetY - camera.y - STAFF_SPRITE.H + TILE_H / 2;

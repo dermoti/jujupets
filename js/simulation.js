@@ -6,7 +6,7 @@ import { shouldSpawnOwner, createOwner, tickOwners } from './matching.js';
 import { checkPlannedEvents, rollRandomEvent, applyEvent } from './events.js';
 import { checkMilestones } from './progression.js';
 
-export function simulateTick(state) {
+export function simulateTick(state, movementSystem) {
   if (state.gameOver) return;
 
   const prevDay = state.time.day;
@@ -50,6 +50,10 @@ export function simulateTick(state) {
 
   if (state.time.year !== prevYear) {
     checkMilestones(state);
+  }
+
+  if (movementSystem) {
+    movementSystem.update(BALANCING.msPerTick, state);
   }
 }
 
