@@ -35,4 +35,17 @@ describe('createCamera', () => {
     expect(cam.x).toBe(400 - 320);
     expect(cam.y).toBe(300 - 240);
   });
+
+  it('setPosition works and clamps', () => {
+    const cam = createCamera(640, 480, 1536, 768);
+    cam.setPosition(200, 100);
+    expect(cam.x).toBe(200);
+    expect(cam.y).toBe(100);
+  });
+
+  it('exposes viewW and viewH', () => {
+    const cam = createCamera(640, 480, 1536, 768);
+    expect(cam.viewW).toBe(640);
+    expect(cam.viewH).toBe(480);
+  });
 });

@@ -43,4 +43,57 @@ describe('ZONES', () => {
     const zone = map.getZone(5, 12);
     expect(zone).toBe('building');
   });
+
+  it('getZone returns dogRun for dog area', () => {
+    const map = createTileMap();
+    expect(map.getZone(5, 3)).toBe('dogRun');
+  });
+
+  it('getZone returns catEnclosure for cat area', () => {
+    const map = createTileMap();
+    expect(map.getZone(15, 11)).toBe('catEnclosure');
+  });
+
+  it('getZone returns null for unzoned area', () => {
+    const map = createTileMap();
+    expect(map.getZone(0, 0)).toBe(null);
+  });
+});
+
+describe('tile type coverage', () => {
+  it('returns wall_back for building top row', () => {
+    const map = createTileMap();
+    expect(map.getTile(5, 8)).toBe('wall_back');
+  });
+
+  it('returns wall_left for building left edge', () => {
+    const map = createTileMap();
+    expect(map.getTile(2, 12)).toBe('wall_left');
+  });
+
+  it('returns wall_right for building right edge', () => {
+    const map = createTileMap();
+    expect(map.getTile(11, 12)).toBe('wall_right');
+  });
+
+  it('returns fence for dog run boundary', () => {
+    const map = createTileMap();
+    expect(map.getTile(3, 1)).toBe('fence');
+  });
+
+  it('returns water for pond area', () => {
+    const map = createTileMap();
+    expect(map.getTile(1, 4)).toBe('water');
+  });
+
+  it('returns grass_flower for cat enclosure interior', () => {
+    const map = createTileMap();
+    expect(map.getTile(15, 11)).toBe('grass_flower');
+  });
+
+  it('returns null for out-of-bounds', () => {
+    const map = createTileMap();
+    expect(map.getTile(-1, 0)).toBe(null);
+    expect(map.getTile(0, 24)).toBe(null);
+  });
 });

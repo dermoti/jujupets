@@ -26,4 +26,12 @@ describe('createTileCache', () => {
     const cache = createTileCache();
     expect(cache.wall_back.height).toBeGreaterThan(cache.floor.height);
   });
+
+  it('has all 11 required tile types', () => {
+    const cache = createTileCache();
+    const required = ['grass', 'grass2', 'grass3', 'grass_flower', 'path', 'floor', 'wall_back', 'wall_left', 'wall_right', 'fence', 'water'];
+    for (const key of required) {
+      expect(cache[key] instanceof HTMLCanvasElement).toBeTruthy();
+    }
+  });
 });
