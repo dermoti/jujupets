@@ -230,6 +230,7 @@ function showAdoptDialog() {
 }
 
 function showAnimalSelectDialog(owner) {
+  audio.playSfx('dialog_open');
   const matchmakerBonus = state.staff.filter(s => s.role === 'matchmaker').reduce((max, s) => Math.max(max, 0.3 + s.level * 0.1), 0);
   let content = `<div style="margin-bottom:8px"><b>${owner.name}</b> sucht ein Tier:</div>`;
   for (const animal of state.animals) {
