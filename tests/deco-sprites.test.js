@@ -13,7 +13,9 @@ describe('createDecoSpriteSheet', () => {
     for (const key of Object.keys(sheet)) {
       expect(sheet[key].canvas instanceof HTMLCanvasElement).toBe(true);
       expect(typeof sheet[key].w).toBe('number');
+      expect(sheet[key].w).toBeGreaterThan(0);
       expect(typeof sheet[key].h).toBe('number');
+      expect(sheet[key].h).toBeGreaterThan(0);
     }
   });
 
