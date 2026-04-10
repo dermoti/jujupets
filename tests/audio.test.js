@@ -134,3 +134,57 @@ describe('SFX registry', () => {
     expect(threw).toBe(false);
   });
 });
+
+describe('Music sequencer', () => {
+  it('isMusicPlaying is false before playMusic()', () => {
+    const audio = createAudioEngine();
+    expect(audio.isMusicPlaying).toBe(false);
+  });
+
+  it('isMusicPlaying is true after playMusic()', () => {
+    const audio = createAudioEngine();
+    audio.playMusic();
+    expect(audio.isMusicPlaying).toBe(true);
+    audio.stopMusic();
+  });
+
+  it('isMusicPlaying is false after stopMusic()', () => {
+    const audio = createAudioEngine();
+    audio.playMusic();
+    audio.stopMusic();
+    expect(audio.isMusicPlaying).toBe(false);
+  });
+
+  it('calling playMusic() twice does not throw', () => {
+    const audio = createAudioEngine();
+    let threw = false;
+    try { audio.playMusic(); audio.playMusic(); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+    audio.stopMusic();
+  });
+
+  it('calling stopMusic() without playMusic() does not throw', () => {
+    const audio = createAudioEngine();
+    let threw = false;
+    try { audio.stopMusic(); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+  });
+});
+
+describe('Ambient layer', () => {
+  it('playMusic starts ambient layer without throwing', () => {
+    const audio = createAudioEngine();
+    let threw = false;
+    try { audio.playMusic(); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+    audio.stopMusic();
+  });
+
+  it('stopMusic stops ambient layer without throwing', () => {
+    const audio = createAudioEngine();
+    audio.playMusic();
+    let threw = false;
+    try { audio.stopMusic(); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+  });
+});
