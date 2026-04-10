@@ -4,6 +4,7 @@ export function createAnimState(spriteInfo) {
   let anim = 0;
   let frame = 0;
   let timer = 0;
+  let direction = 0;
   const frameMs = 200;
 
   return {
@@ -13,6 +14,10 @@ export function createAnimState(spriteInfo) {
         frame = 0;
         timer = 0;
       }
+    },
+
+    setDir(d) {
+      direction = d;
     },
 
     update(dt) {
@@ -25,7 +30,7 @@ export function createAnimState(spriteInfo) {
 
     getFrame() {
       return {
-        sx: frame * spriteInfo.W,
+        sx: (direction * spriteInfo.FRAMES + frame) * spriteInfo.W,
         sy: anim * spriteInfo.H,
         sw: spriteInfo.W,
         sh: spriteInfo.H,
@@ -34,7 +39,14 @@ export function createAnimState(spriteInfo) {
 
     get currentAnim() { return anim; },
     get currentFrame() { return frame; },
+    get currentDir() { return direction; },
   };
+}
+
+export function directionFromVelocity(dx, dy) {
+  if (dx === 0 && dy === 0) return 0;
+  if (Math.abs(dx) > Math.abs(dy)) return dx < 0 ? 1 : 3;
+  return dy < 0 ? 2 : 0;
 }
 
 export function animalAnimFromStats(animal) {
