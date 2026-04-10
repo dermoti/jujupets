@@ -150,3 +150,28 @@ describe('removeEntity', () => {
     expect(ms.isMoving(5)).toBe(false);
   });
 });
+
+describe('Entity direction tracking', () => {
+  it('getDirection returns 0 for idle entity', () => {
+    const tileMap = createTileMap();
+    const ms = createMovementSystem(tileMap);
+    ms.initAnimal({ id: 0, species: 'dog' });
+    expect(ms.getDirection(0)).toBe(0);
+  });
+
+  it('getDirection returns 0-3 for moving entity', () => {
+    const tileMap = createTileMap();
+    const ms = createMovementSystem(tileMap);
+    const animal = { id: 0, species: 'dog' };
+    ms.initAnimal(animal);
+    ms.update(5000, { animals: [animal], staff: [] });
+    const dir = ms.getDirection(0);
+    expect(dir >= 0 && dir <= 3).toBe(true);
+  });
+
+  it('getDirection returns null for unknown entity', () => {
+    const tileMap = createTileMap();
+    const ms = createMovementSystem(tileMap);
+    expect(ms.getDirection(999)).toBe(null);
+  });
+});

@@ -1,4 +1,5 @@
 import { ZONES } from './tilemap.js';
+import { directionFromVelocity } from './sprites.js';
 
 const SPECIES_ZONE_MAP = {
   dog: 'dogRun',
@@ -28,6 +29,7 @@ export function createMovementSystem(tileMap) {
       pauseTimer: 0,
       pauseDuration: 2000 + Math.random() * 2000,
       moving: false,
+      direction: 0,
     });
   }
 
@@ -44,6 +46,7 @@ export function createMovementSystem(tileMap) {
       moving: false,
       arrivedAtTarget: false,
       _lastAssignment: staff.assignedAnimalId,
+      direction: 0,
     });
   }
 
@@ -60,6 +63,12 @@ export function createMovementSystem(tileMap) {
   function isMoving(id) {
     const ent = entities.get(id);
     return ent ? ent.moving : false;
+  }
+
+  function getDirection(id) {
+    const ent = entities.get(id);
+    if (!ent) return null;
+    return ent.direction;
   }
 
   function pickAnimalTarget(ent) {
@@ -83,6 +92,7 @@ export function createMovementSystem(tileMap) {
   function moveToward(ent, dtSec) {
     const dx = ent.targetTile.col - ent.worldPos.col;
     const dy = ent.targetTile.row - ent.worldPos.row;
+    ent.direction = directionFromVelocity(dx, dy);
     const dist = Math.sqrt(dx * dx + dy * dy);
     if (dist < 0.05) {
       ent.worldPos.col = ent.targetTile.col;
@@ -222,5 +232,5 @@ export function createMovementSystem(tileMap) {
     }
   }
 
-  return { initAnimal, initStaff, removeEntity, update, getPosition, isMoving };
+  return { initAnimal, initStaff, removeEntity, update, getPosition, isMoving, getDirection };
 }
