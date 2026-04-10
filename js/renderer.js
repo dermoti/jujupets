@@ -34,16 +34,11 @@ export function createRenderer(canvas, tileMap, movementSystem, particleSystem) 
   const animalAnims = new Map();
   const staffAnims = new Map();
 
-  const leftMost = worldToScreen(0, MAP_ROWS - 1, TILE_W, TILE_H);
-  const rightMost = worldToScreen(MAP_COLS - 1, 0, TILE_W, TILE_H);
-  const bottomMost = worldToScreen(MAP_COLS - 1, MAP_ROWS - 1, TILE_W, TILE_H);
-  const mapOffsetX = -leftMost.x + TILE_W / 2;
-  const mapOffsetY = 0;
-  const worldPixelW = rightMost.x - leftMost.x + TILE_W;
-  const worldPixelH = bottomMost.y + TILE_H * 3;
+  // Water animation timer
+  let waterTime = 0;
 
   function getWorldSize() {
-    return { w: worldPixelW, h: worldPixelH };
+    return { w: MAP_COLS * TILE_SIZE, h: MAP_ROWS * TILE_SIZE };
   }
 
   function getAnimalPosition(animal) {
@@ -69,30 +64,22 @@ export function createRenderer(canvas, tileMap, movementSystem, particleSystem) 
     return { col: 6 + (staff.id % 3), row: 17 };
   }
 
-  // Cache sky gradient once
-  const skyGradient = ctx.createLinearGradient(0, 0, 0, H);
-  skyGradient.addColorStop(0, '#87CEEB');
-  skyGradient.addColorStop(1, '#B3E5FC');
-
-  // Water animation timer (accumulated from dt, pauseable)
-  let waterTime = 0;
-
   function render(state, camera, dt) {
     waterTime += dt;
-    ctx.fillStyle = skyGradient;
+
+    // 1. Fill background
+    ctx.fillStyle = '#3a5a2a';
     ctx.fillRect(0, 0, W, H);
 
-    const renderables = [];
-
-    // Ground tiles
+    // 2. Draw tiles (with frustum culling)
     for (let row = 0; row < MAP_ROWS; row++) {
       for (let col = 0; col < MAP_COLS; col++) {
         const tileType = tileMap.getTile(col, row);
         if (!tileType) continue;
-        const screen = worldToScreen(col, row, TILE_W, TILE_H);
-        const sx = screen.x + mapOffsetX - camera.x;
-        const sy = screen.y + mapOffsetY - camera.y;
-        if (sx + TILE_W < 0 || sx > W || sy + 64 < 0 || sy > H) continue;
+
+        const sx = col * TILE_SIZE - camera.x;
+        const sy = row * TILE_SIZE - camera.y;
+        if (sx + TILE_SIZE < 0 || sx > W || sy + TILE_SIZE < 0 || sy > H) continue;
 
         let tileCanvas;
         if (tileType === 'water') {
@@ -106,85 +93,69 @@ export function createRenderer(canvas, tileMap, movementSystem, particleSystem) 
         }
         if (!tileCanvas) tileCanvas = tileCache.grass;
 
-        const heightOffset = tileCanvas.height - TILE_H;
-        renderables.push({
-          depth: depthKey(col, row, 0),
-          draw() { ctx.drawImage(tileCanvas, sx, sy - heightOffset); }
-        });
+        ctx.drawImage(tileCanvas, sx, sy);
       }
     }
 
-    // Deco layer
+    // 3. Draw deco
     for (let row = 0; row < MAP_ROWS; row++) {
       for (let col = 0; col < MAP_COLS; col++) {
         const decoId = decoMap[row][col];
         if (!decoId) continue;
         const sprite = decoSheets[decoId];
         if (!sprite) continue;
-        const screen = worldToScreen(col, row, TILE_W, TILE_H);
-        const sx = screen.x + mapOffsetX - camera.x + TILE_W / 2 - sprite.w / 2;
-        const sy = screen.y + mapOffsetY - camera.y + TILE_H / 2 - sprite.h;
+
+        const sx = col * TILE_SIZE - camera.x + TILE_SIZE / 2 - sprite.w / 2;
+        const sy = row * TILE_SIZE - camera.y + TILE_SIZE / 2 - sprite.h / 2;
         if (sx + sprite.w < 0 || sx > W || sy + sprite.h < 0 || sy > H) continue;
-        renderables.push({
-          depth: depthKey(col, row, 1),
-          draw() { ctx.drawImage(sprite.canvas, sx, sy); }
-        });
+
+        ctx.drawImage(sprite.canvas, sx, sy);
       }
     }
 
-    // Animals
+    // 4. Draw animals
     for (const animal of state.animals) {
       const pos = (movementSystem && movementSystem.getPosition(animal.id)) || getAnimalPosition(animal);
-      const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
-      const sx = screen.x + mapOffsetX - camera.x + TILE_W / 2 - ANIMAL_SPRITE.W / 2;
-      const sy = screen.y + mapOffsetY - camera.y - ANIMAL_SPRITE.H + TILE_H / 2;
+      const sx = pos.col * TILE_SIZE - camera.x + TILE_SIZE / 2 - ANIMAL_SPRITE.W / 2;
+      const sy = pos.row * TILE_SIZE - camera.y + TILE_SIZE / 2 - ANIMAL_SPRITE.H / 2;
       if (sx + ANIMAL_SPRITE.W < 0 || sx > W || sy + ANIMAL_SPRITE.H < 0 || sy > H) continue;
 
       if (!animalAnims.has(animal.id)) animalAnims.set(animal.id, createAnimState(ANIMAL_SPRITE));
-      const as = animalAnims.get(animal.id);
-      as.setAnim(animalAnimFromStats(animal));
-      as.update(dt);
-      const f = as.getFrame();
+      const animState = animalAnims.get(animal.id);
+      animState.setAnim(animalAnimFromStats(animal));
+      const dir = (movementSystem && movementSystem.getDirection(animal.id)) || 0;
+      animState.setDir(dir);
+      animState.update(dt);
+      const f = animState.getFrame();
       const sheet = animalSheets[animal.species] || animalSheets.dog;
 
-      renderables.push({
-        depth: depthKey(pos.col, pos.row, 1),
-        draw() {
-          ctx.drawImage(sheet, f.sx, f.sy, f.sw, f.sh, sx, sy, ANIMAL_SPRITE.W, ANIMAL_SPRITE.H);
-          ctx.fillStyle = '#4E342E';
-          ctx.font = '8px monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText(animal.name, sx + ANIMAL_SPRITE.W / 2, sy + ANIMAL_SPRITE.H + 8);
-        }
-      });
+      ctx.drawImage(sheet, f.sx, f.sy, f.sw, f.sh, sx, sy, ANIMAL_SPRITE.W, ANIMAL_SPRITE.H);
+      ctx.fillStyle = '#e0e0e0';
+      ctx.font = '7px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(animal.name, sx + ANIMAL_SPRITE.W / 2, sy + ANIMAL_SPRITE.H + 7);
     }
 
-    // Staff
+    // 5. Draw staff
     for (const staff of state.staff) {
       const pos = (movementSystem && movementSystem.getPosition(staff.id)) || getStaffPosition(staff, state);
-      const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
-      const sx = screen.x + mapOffsetX - camera.x + TILE_W / 2 - STAFF_SPRITE.W / 2;
-      const sy = screen.y + mapOffsetY - camera.y - STAFF_SPRITE.H + TILE_H / 2;
+      const sx = pos.col * TILE_SIZE - camera.x + TILE_SIZE / 2 - STAFF_SPRITE.W / 2;
+      const sy = pos.row * TILE_SIZE - camera.y + TILE_SIZE / 2 - STAFF_SPRITE.H / 2;
       if (sx + STAFF_SPRITE.W < 0 || sx > W || sy + STAFF_SPRITE.H < 0 || sy > H) continue;
 
       if (!staffAnims.has(staff.id)) staffAnims.set(staff.id, createAnimState(STAFF_SPRITE));
-      const as = staffAnims.get(staff.id);
-      as.setAnim(staffAnimFromState(staff));
-      as.update(dt);
-      const f = as.getFrame();
+      const animState = staffAnims.get(staff.id);
+      animState.setAnim(staffAnimFromState(staff));
+      const dir = (movementSystem && movementSystem.getDirection(staff.id)) || 0;
+      animState.setDir(dir);
+      animState.update(dt);
+      const f = animState.getFrame();
       const sheet = staffSheets[staff.role] || staffSheets.caretaker;
 
-      renderables.push({
-        depth: depthKey(pos.col, pos.row, 1),
-        draw() {
-          ctx.drawImage(sheet, f.sx, f.sy, f.sw, f.sh, sx, sy, STAFF_SPRITE.W, STAFF_SPRITE.H);
-        }
-      });
+      ctx.drawImage(sheet, f.sx, f.sy, f.sw, f.sh, sx, sy, STAFF_SPRITE.W, STAFF_SPRITE.H);
     }
 
-    renderables.sort((a, b) => a.depth - b.depth);
-    for (const r of renderables) r.draw();
-
+    // 6. Draw particles
     if (particleSystem) {
       particleSystem.update(dt);
       particleSystem.render(ctx);
