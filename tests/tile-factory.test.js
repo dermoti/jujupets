@@ -29,9 +29,11 @@ describe('createTileCache', () => {
 
   it('has all 11 required tile types', () => {
     const cache = createTileCache();
-    const required = ['grass', 'grass2', 'grass3', 'grass_flower', 'path', 'floor', 'wall_back', 'wall_left', 'wall_right', 'fence', 'water'];
-    for (const key of required) {
+    const canvasKeys = ['grass', 'grass2', 'grass3', 'grass_flower', 'path', 'floor', 'wall_back', 'wall_left', 'wall_right', 'fence'];
+    for (const key of canvasKeys) {
       expect(cache[key] instanceof HTMLCanvasElement).toBeTruthy();
     }
+    expect(Array.isArray(cache.water)).toBeTruthy();
+    expect(cache.water.length).toBe(3);
   });
 });

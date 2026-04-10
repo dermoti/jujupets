@@ -87,10 +87,15 @@ export function createRenderer(canvas, tileMap) {
         const sy = screen.y + mapOffsetY - camera.y;
         if (sx + TILE_W < 0 || sx > W || sy + 64 < 0 || sy > H) continue;
 
-        let tileCanvas = tileCache[tileType];
-        if (tileType === 'grass') {
+        let tileCanvas;
+        if (tileType === 'water') {
+          const waterFrame = Math.floor(Date.now() / 500) % 3;
+          tileCanvas = tileCache.water[waterFrame];
+        } else if (tileType === 'grass') {
           const v = (col * 7 + row * 13) % 3;
           tileCanvas = v === 0 ? tileCache.grass : v === 1 ? tileCache.grass2 : tileCache.grass3;
+        } else {
+          tileCanvas = tileCache[tileType];
         }
         if (!tileCanvas) tileCanvas = tileCache.grass;
 

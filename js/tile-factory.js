@@ -161,7 +161,7 @@ function drawFence() {
   return c;
 }
 
-function drawWater() {
+function drawWaterFrame(waveOffset) {
   const c = makeCanvas(TILE_W, TILE_H);
   const ctx = c.getContext('2d');
   drawDiamond(ctx, TILE_W, TILE_H, '#42A5F5');
@@ -169,7 +169,10 @@ function drawWater() {
   ctx.strokeStyle = '#90CAF9';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(TILE_W / 2, TILE_H / 2, 6, 0, Math.PI);
+  ctx.arc(TILE_W / 2 + waveOffset, TILE_H / 2 - 2, 6, 0, Math.PI);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(TILE_W / 2 - waveOffset * 0.7, TILE_H / 2 + 4, 5, 0, Math.PI);
   ctx.stroke();
   return c;
 }
@@ -186,6 +189,6 @@ export function createTileCache() {
     wall_left: drawWallLeft(),
     wall_right: drawWallRight(),
     fence: drawFence(),
-    water: drawWater(),
+    water: [drawWaterFrame(-6), drawWaterFrame(0), drawWaterFrame(6)],
   };
 }
