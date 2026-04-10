@@ -49,53 +49,25 @@ export function createParticleSystem() {
     }
   }
 
-  function renderHeart(ctx, x, y, size, alpha) {
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = '#E91E63';
-    const s = size / 2;
-    ctx.beginPath();
-    ctx.arc(x - s / 2, y - s / 2, s, 0, Math.PI * 2);
-    ctx.arc(x + s / 2, y - s / 2, s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(x - s, y);
-    ctx.lineTo(x, y + s * 1.5);
-    ctx.lineTo(x + s, y);
-    ctx.fill();
-  }
-
-  function renderStar(ctx, x, y, size, alpha) {
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = '#F9A825';
-    ctx.fillRect(x - size / 2, y - 1, size, 2);
-    ctx.fillRect(x - 1, y - size / 2, 2, size);
-    ctx.fillRect(x - size / 3, y - size / 3, size * 0.66, size * 0.66);
-  }
-
-  function renderNote(ctx, x, y, size, alpha) {
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = '#7E57C2';
-    ctx.beginPath();
-    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillRect(x + size / 2 - 1, y - size, 2, size);
-    ctx.fillRect(x + size / 2 - 1, y - size, 4, 2);
-  }
-
-  function renderSparkle(ctx, x, y, size, alpha) {
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(x - size / 2, y - size / 2, size, size);
-  }
-
-  const renderers = { heart: renderHeart, star: renderStar, note: renderNote, sparkle: renderSparkle };
+  const UNICODE_MAP = {
+    heart:   { char: '\u2665', color: '#E91E63' },
+    star:    { char: '\u2605', color: '#F9A825' },
+    note:    { char: '\u266A', color: '#7E57C2' },
+    sparkle: { char: '\u2726', color: '#FFFFFF' },
+  };
 
   function render(ctx) {
     ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     for (const p of particles) {
       const alpha = Math.max(0, p.life / p.maxLife);
-      const fn = renderers[p.type];
-      if (fn) fn(ctx, p.x, p.y, p.size, alpha);
+      const cfg = UNICODE_MAP[p.type];
+      if (!cfg) continue;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = cfg.color;
+      ctx.font = `${p.size * 2}px sans-serif`;
+      ctx.fillText(cfg.char, p.x, p.y);
     }
     ctx.restore();
   }

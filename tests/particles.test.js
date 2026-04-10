@@ -84,3 +84,19 @@ describe('render', () => {
     expect(threw).toBe(false);
   });
 });
+
+describe('PA unicode rendering', () => {
+  it('renders all 4 particle types without throwing', () => {
+    const ps = createParticleSystem();
+    ps.emit('heart', 50, 50, 1);
+    ps.emit('star', 60, 60, 1);
+    ps.emit('note', 70, 70, 1);
+    ps.emit('sparkle', 80, 80, 1);
+    const c = document.createElement('canvas');
+    c.width = 200; c.height = 200;
+    const ctx = c.getContext('2d');
+    let threw = false;
+    try { ps.render(ctx); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+  });
+});
