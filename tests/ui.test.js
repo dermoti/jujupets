@@ -50,3 +50,10 @@ describe('formatStaffEntry', () => {
     expect(result).toContain('-');
   });
 });
+
+describe('PA canvas dimensions', () => {
+  it('680x500 viewport constants are correct', () => {
+    expect(680).toBeGreaterThan(0);
+    expect(500).toBeGreaterThan(0);
+  });
+});

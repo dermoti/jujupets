@@ -3,6 +3,9 @@ import { calculateMatchScore } from './matching.js';
 
 const MONTH_NAMES = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
 
+const ROLE_COLORS = { caretaker: '#4CAF50', vet: '#ECEFF1', trainer: '#FF9800', matchmaker: '#CE93D8' };
+const SPECIES_COLORS = { dog: '#C8A070', cat: '#9E9E9E', rabbit: '#E0C8A0', smallpet: '#D0B080', bird: '#4FC3F7' };
+
 export function formatMoney(amount) {
   if (amount < 0) return `-$${Math.abs(amount).toLocaleString('de-DE')}`;
   return `$${amount.toLocaleString('de-DE')}`;
@@ -110,7 +113,7 @@ export function createUI(state, callbacks) {
     elements.date.textContent = formatDate(state.time);
 
     elements.staffList.innerHTML = state.staff.map(s =>
-      `<div class="staff-entry">${formatStaffEntry(s, state.animals)}</div>`
+      `<div class="staff-entry"><span class="mini-portrait" style="background:${ROLE_COLORS[s.role] || '#555'}"></span>${formatStaffEntry(s, state.animals)}</div>`
     ).join('');
 
     elements.applicantList.innerHTML = state.owners.map(o => {
@@ -122,7 +125,8 @@ export function createUI(state, callbacks) {
     }).join('') || '<div style="color:#666">Keine Bewerber</div>';
 
     if (state.tickerMessages.length > 0) {
-      elements.ticker.textContent = state.tickerMessages[state.tickerMessages.length - 1];
+      const messages = state.tickerMessages.slice(-5);
+      elements.ticker.innerHTML = '<span class="ticker-text">' + messages.join(' | ') + '</span>';
     }
   }
 
