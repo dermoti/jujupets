@@ -97,7 +97,6 @@ export function createParticleSystem() {
       const fn = renderers[p.type];
       if (fn) fn(ctx, p.x, p.y, p.size, alpha);
     }
-    ctx.globalAlpha = 1;
     ctx.restore();
   }
 
