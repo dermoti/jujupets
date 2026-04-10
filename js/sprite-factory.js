@@ -151,3 +151,205 @@ export function createStaffSpriteSheet(roleKey) {
 
 export const ANIMAL_SPRITE = { W: ANIMAL_W, H: ANIMAL_H, FRAMES: ANIMAL_FRAMES, ANIMS: ANIMAL_ANIMS };
 export const STAFF_SPRITE = { W: STAFF_W, H: STAFF_H, FRAMES: STAFF_FRAMES, ANIMS: STAFF_ANIMS };
+
+let _decoCache = null;
+
+export function createDecoSpriteSheet() {
+  if (_decoCache) return _decoCache;
+
+  function draw(w, h, painter) {
+    const c = makeCanvas(w, h);
+    const ctx = c.getContext('2d');
+    painter(ctx, w, h);
+    return { canvas: c, w, h };
+  }
+
+  _decoCache = {
+    tree_oak: draw(64, 96, (ctx, w, h) => {
+      // Trunk
+      ctx.fillStyle = '#5D4037';
+      ctx.fillRect(28, 50, 8, 46);
+      // Canopy (round)
+      ctx.fillStyle = '#388E3C';
+      ctx.beginPath();
+      ctx.arc(32, 40, 24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#43A047';
+      ctx.beginPath();
+      ctx.arc(28, 35, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }),
+
+    tree_pine: draw(64, 96, (ctx, w, h) => {
+      // Trunk
+      ctx.fillStyle = '#4E342E';
+      ctx.fillRect(29, 60, 6, 36);
+      // Triangle layers
+      ctx.fillStyle = '#2E7D32';
+      ctx.beginPath(); ctx.moveTo(32, 5); ctx.lineTo(52, 40); ctx.lineTo(12, 40); ctx.fill();
+      ctx.fillStyle = '#388E3C';
+      ctx.beginPath(); ctx.moveTo(32, 20); ctx.lineTo(56, 55); ctx.lineTo(8, 55); ctx.fill();
+      ctx.fillStyle = '#43A047';
+      ctx.beginPath(); ctx.moveTo(32, 35); ctx.lineTo(58, 65); ctx.lineTo(6, 65); ctx.fill();
+    }),
+
+    bush: draw(32, 32, (ctx) => {
+      ctx.fillStyle = '#4CAF50';
+      ctx.beginPath();
+      ctx.arc(16, 22, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#66BB6A';
+      ctx.beginPath();
+      ctx.arc(12, 18, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(20, 18, 8, 0, Math.PI * 2);
+      ctx.fill();
+    }),
+
+    bench: draw(64, 32, (ctx) => {
+      // Seat
+      ctx.fillStyle = '#8D6E63';
+      ctx.fillRect(4, 14, 56, 6);
+      // Legs
+      ctx.fillStyle = '#5D4037';
+      ctx.fillRect(8, 20, 4, 10);
+      ctx.fillRect(52, 20, 4, 10);
+      // Back rest
+      ctx.fillStyle = '#795548';
+      ctx.fillRect(4, 8, 56, 4);
+      ctx.fillRect(8, 4, 4, 14);
+      ctx.fillRect(52, 4, 4, 14);
+    }),
+
+    flower_bed: draw(64, 32, (ctx) => {
+      // Soil
+      ctx.fillStyle = '#6D4C41';
+      ctx.fillRect(4, 18, 56, 12);
+      // Flowers
+      const colors = ['#E91E63', '#FF9800', '#FFEB3B', '#9C27B0', '#2196F3'];
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = colors[i];
+        ctx.beginPath();
+        ctx.arc(10 + i * 11, 14, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Stems
+      ctx.fillStyle = '#4CAF50';
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(9 + i * 11, 14, 2, 8);
+      }
+    }),
+
+    cage: draw(64, 64, (ctx) => {
+      // Floor
+      ctx.fillStyle = '#BDBDBD';
+      ctx.fillRect(4, 48, 56, 12);
+      // Bars
+      ctx.strokeStyle = '#757575';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 7; i++) {
+        const x = 8 + i * 8;
+        ctx.beginPath(); ctx.moveTo(x, 12); ctx.lineTo(x, 48); ctx.stroke();
+      }
+      // Top bar
+      ctx.beginPath(); ctx.moveTo(8, 12); ctx.lineTo(56, 12); ctx.stroke();
+      // Open door hint
+      ctx.fillStyle = '#E0E0E0';
+      ctx.fillRect(24, 24, 16, 24);
+    }),
+
+    treatment_table: draw(64, 64, (ctx) => {
+      // Table top
+      ctx.fillStyle = '#CFD8DC';
+      ctx.fillRect(4, 20, 56, 8);
+      // Legs
+      ctx.fillStyle = '#90A4AE';
+      ctx.fillRect(8, 28, 4, 32);
+      ctx.fillRect(52, 28, 4, 32);
+      ctx.fillRect(28, 28, 4, 32);
+      // Surface detail
+      ctx.fillStyle = '#B0BEC5';
+      ctx.fillRect(8, 20, 48, 2);
+    }),
+
+    counter: draw(64, 64, (ctx) => {
+      // Main body
+      ctx.fillStyle = '#8D6E63';
+      ctx.fillRect(4, 16, 56, 44);
+      // Top surface
+      ctx.fillStyle = '#A1887F';
+      ctx.fillRect(2, 12, 60, 8);
+      // Front panel lines
+      ctx.strokeStyle = '#6D4C41';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(32, 20); ctx.lineTo(32, 60);
+      ctx.stroke();
+    }),
+
+    shelf: draw(64, 64, (ctx) => {
+      // Back panel
+      ctx.fillStyle = '#8D6E63';
+      ctx.fillRect(4, 0, 56, 64);
+      // Shelves
+      ctx.fillStyle = '#A1887F';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(2, 12 + i * 18, 60, 4);
+      }
+      // Bags on shelves
+      ctx.fillStyle = '#FFF9C4';
+      ctx.fillRect(10, 2, 12, 10);
+      ctx.fillRect(30, 2, 12, 10);
+      ctx.fillStyle = '#FFCC80';
+      ctx.fillRect(12, 20, 10, 12);
+      ctx.fillRect(38, 20, 10, 12);
+      ctx.fillStyle = '#C8E6C9';
+      ctx.fillRect(14, 38, 10, 10);
+    }),
+
+    food_bowl: draw(32, 16, (ctx) => {
+      // Bowl
+      ctx.fillStyle = '#FF8A65';
+      ctx.beginPath();
+      ctx.ellipse(16, 10, 12, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Food inside
+      ctx.fillStyle = '#8D6E63';
+      ctx.beginPath();
+      ctx.ellipse(16, 8, 9, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }),
+
+    water_bowl: draw(32, 16, (ctx) => {
+      // Bowl
+      ctx.fillStyle = '#90CAF9';
+      ctx.beginPath();
+      ctx.ellipse(16, 10, 12, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Water surface
+      ctx.fillStyle = '#42A5F5';
+      ctx.beginPath();
+      ctx.ellipse(16, 8, 9, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }),
+
+    climbing_tree: draw(32, 64, (ctx) => {
+      // Post
+      ctx.fillStyle = '#8D6E63';
+      ctx.fillRect(12, 8, 8, 56);
+      // Platforms
+      ctx.fillStyle = '#A1887F';
+      ctx.fillRect(2, 6, 28, 6);
+      ctx.fillRect(4, 28, 24, 6);
+      ctx.fillRect(0, 50, 32, 6);
+      // Carpet on platforms
+      ctx.fillStyle = '#CE93D8';
+      ctx.fillRect(4, 6, 24, 3);
+      ctx.fillRect(6, 28, 20, 3);
+      ctx.fillRect(2, 50, 28, 3);
+    }),
+  };
+
+  return _decoCache;
+}

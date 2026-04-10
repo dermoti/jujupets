@@ -1,6 +1,6 @@
 import { worldToScreen, depthKey, TILE_W, TILE_H, MAP_COLS, MAP_ROWS } from './iso.js';
 import { createTileCache } from './tile-factory.js';
-import { createAnimalSpriteSheet, createStaffSpriteSheet, ANIMAL_SPRITE, STAFF_SPRITE } from './sprite-factory.js';
+import { createAnimalSpriteSheet, createStaffSpriteSheet, createDecoSpriteSheet, ANIMAL_SPRITE, STAFF_SPRITE } from './sprite-factory.js';
 import { createAnimState, animalAnimFromStats, staffAnimFromState } from './sprites.js';
 import { ZONES } from './tilemap.js';
 
@@ -27,6 +27,9 @@ export function createRenderer(canvas, tileMap, movementSystem) {
   for (const key of ['caretaker', 'vet', 'trainer', 'matchmaker']) {
     staffSheets[key] = createStaffSpriteSheet(key);
   }
+
+  const decoSheets = createDecoSpriteSheet();
+  const decoMap = tileMap.getDecoMap();
 
   const animalAnims = new Map();
   const staffAnims = new Map();
@@ -107,6 +110,24 @@ export function createRenderer(canvas, tileMap, movementSystem) {
         renderables.push({
           depth: depthKey(col, row, 0),
           draw() { ctx.drawImage(tileCanvas, sx, sy - heightOffset); }
+        });
+      }
+    }
+
+    // Deco layer
+    for (let row = 0; row < MAP_ROWS; row++) {
+      for (let col = 0; col < MAP_COLS; col++) {
+        const decoId = decoMap[row][col];
+        if (!decoId) continue;
+        const sprite = decoSheets[decoId];
+        if (!sprite) continue;
+        const screen = worldToScreen(col, row, TILE_W, TILE_H);
+        const sx = screen.x + mapOffsetX - camera.x + TILE_W / 2 - sprite.w / 2;
+        const sy = screen.y + mapOffsetY - camera.y + TILE_H / 2 - sprite.h;
+        if (sx + sprite.w < 0 || sx > W || sy + sprite.h < 0 || sy > H) continue;
+        renderables.push({
+          depth: depthKey(col, row, 1),
+          draw() { ctx.drawImage(sprite.canvas, sx, sy); }
         });
       }
     }
