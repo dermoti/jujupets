@@ -12,7 +12,7 @@ const SPECIES_ZONE_MAP = {
   bird: 'birdAviary',
 };
 
-export function createRenderer(canvas, tileMap, movementSystem) {
+export function createRenderer(canvas, tileMap, movementSystem, particleSystem) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;
@@ -184,6 +184,11 @@ export function createRenderer(canvas, tileMap, movementSystem) {
 
     renderables.sort((a, b) => a.depth - b.depth);
     for (const r of renderables) r.draw();
+
+    if (particleSystem) {
+      particleSystem.update(dt);
+      particleSystem.render(ctx);
+    }
   }
 
   return { render, getWorldSize };

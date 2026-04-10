@@ -3,6 +3,7 @@ import { createNewState, loadState, saveState } from './state.js';
 import { createRenderer } from './renderer.js';
 import { createTileMap } from './tilemap.js';
 import { createMovementSystem } from './movement.js';
+import { createParticleSystem } from './particles.js';
 import { createCamera } from './camera.js';
 import { createUI } from './ui.js';
 import { simulateTick } from './simulation.js';
@@ -16,7 +17,8 @@ import { worldToScreen, TILE_W, TILE_H } from './iso.js';
 const canvas = document.getElementById('shelter-canvas');
 const tileMap = createTileMap();
 const movementSystem = createMovementSystem(tileMap);
-const renderer = createRenderer(canvas, tileMap, movementSystem);
+const particleSystem = createParticleSystem();
+const renderer = createRenderer(canvas, tileMap, movementSystem, particleSystem);
 const worldSize = renderer.getWorldSize();
 const camera = createCamera(canvas.width, canvas.height, worldSize.w, worldSize.h);
 
@@ -73,6 +75,36 @@ engine.onTick = (ticks) => {
   for (let i = 0; i < ticks; i++) {
     simulateTick(state, movementSystem);
   }
+
+  // Particle triggers
+  for (const animal of state.animals) {
+    const pos = movementSystem.getPosition(animal.id);
+    if (!pos) continue;
+    const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
+    const sx = screen.x + worldSize.w / 4 - camera.x + TILE_W / 2;
+    const sy = screen.y - camera.y;
+    // Happy animals: 1% chance per tick emit 1 heart
+    if (animal.happiness > 0.7 && Math.random() < 0.01) {
+      particleSystem.emit('heart', sx, sy, 1);
+    }
+    // Birds: 0.7% chance per tick emit 1 note
+    if (animal.species === 'bird' && Math.random() < 0.007) {
+      particleSystem.emit('note', sx, sy, 1);
+    }
+  }
+  for (const staff of state.staff) {
+    if (!staff._working) continue;
+    const pos = movementSystem.getPosition(staff.id);
+    if (!pos) continue;
+    const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
+    const sx = screen.x + worldSize.w / 4 - camera.x + TILE_W / 2;
+    const sy = screen.y - camera.y;
+    // Working staff: 1.5% chance per tick emit 1 sparkle
+    if (Math.random() < 0.015) {
+      particleSystem.emit('sparkle', sx, sy, 1);
+    }
+  }
+
   autoSaveCounter += ticks;
   if (autoSaveCounter > BALANCING.ticksPerDay * 7) {
     saveState(state);
@@ -161,6 +193,11 @@ function showAnimalSelectDialog(owner) {
       if (!animal) return;
       const score = calculateMatchScore(animal, owner, matchmakerBonus);
       const result = executeAdoption(state, animal, owner, score);
+      const adoptPos = movementSystem.getPosition(animal.id);
+      if (adoptPos) {
+        const adoptScreen = worldToScreen(adoptPos.col, adoptPos.row, TILE_W, TILE_H);
+        particleSystem.emit('star', adoptScreen.x + worldSize.w / 4 - camera.x + TILE_W / 2, adoptScreen.y - camera.y, 5);
+      }
       movementSystem.removeEntity(animal.id);
       state.tickerMessages.push(`${animal.name} vermittelt an ${owner.name}! Match: ${Math.floor(score)}%, Geb\u00fchr: $${result.fee}`);
       ui.hideDialog();
@@ -181,7 +218,14 @@ function showShopDialog() {
       if (state.money < cost) return;
       state.money -= cost;
       const need = item === 'food' ? 'food' : 'medicine';
-      for (const animal of state.animals) animal.needs[need] = Math.min(1, animal.needs[need] + 0.3);
+      for (const animal of state.animals) {
+        animal.needs[need] = Math.min(1, animal.needs[need] + 0.3);
+        const shopPos = movementSystem.getPosition(animal.id);
+        if (shopPos) {
+          const shopScreen = worldToScreen(shopPos.col, shopPos.row, TILE_W, TILE_H);
+          particleSystem.emit('sparkle', shopScreen.x + worldSize.w / 4 - camera.x + TILE_W / 2, shopScreen.y - camera.y, 1);
+        }
+      }
       state.tickerMessages.push(`${item === 'food' ? 'Futter' : 'Medizin'} eingekauft!`);
     });
   });
