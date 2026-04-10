@@ -473,209 +473,241 @@ export const STAFF_SPRITE = {
 };
 
 // ============================================================
-// Deco sprites — to be fully rewritten in T11.
-// Sizes are all capped at 32x32 (TILE_SIZE) or multiples.
+// Deco sprites — PA style: simple shapes, thick #333 outlines,
+// smaller sizes to fit 32x32 tiles.
 // ============================================================
-const TILE_SIZE = 32;
 
 let _decoCache = null;
 
 export function createDecoSpriteSheet() {
   if (_decoCache) return _decoCache;
 
+  const LW = 2; // thick outline width
+
   function draw(w, h, painter) {
     const c = makeCanvas(w, h);
     const ctx = c.getContext('2d');
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = LW;
     painter(ctx, w, h);
     return { canvas: c, w, h };
   }
 
-  _decoCache = {
-    tree_oak: draw(TILE_SIZE * 2, TILE_SIZE * 3, (ctx, w, h) => {
+  function strokeRect(ctx, x, y, w, h) {
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = LW;
+    ctx.strokeRect(x + LW / 2, y + LW / 2, w - LW, h - LW);
+  }
+
+  function strokeCircle(ctx, cx, cy, r) {
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = LW;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - LW / 2, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  const sheet = {
+    // tree_oak: 32x48
+    tree_oak: draw(32, 48, (ctx) => {
+      // Trunk
+      ctx.fillStyle = '#6D4C41';
+      ctx.fillRect(13, 30, 6, 16);
+      strokeRect(ctx, 13, 30, 6, 16);
+      // Canopy circle
+      ctx.fillStyle = '#388E3C';
+      ctx.beginPath();
+      ctx.arc(16, 18, 13, 0, Math.PI * 2);
+      ctx.fill();
+      strokeCircle(ctx, 16, 18, 13);
+    }),
+
+    // tree_pine: 32x48
+    tree_pine: draw(32, 48, (ctx) => {
       // Trunk
       ctx.fillStyle = '#5D4037';
-      ctx.fillRect(28, 50, 8, 46);
-      // Canopy
-      ctx.fillStyle = '#388E3C';
-      ctx.beginPath();
-      ctx.arc(32, 40, 24, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#43A047';
-      ctx.beginPath();
-      ctx.arc(28, 35, 16, 0, Math.PI * 2);
-      ctx.fill();
-    }),
-
-    tree_pine: draw(TILE_SIZE * 2, TILE_SIZE * 3, (ctx, w, h) => {
-      // Trunk
-      ctx.fillStyle = '#4E342E';
-      ctx.fillRect(29, 60, 6, 36);
-      // Triangle layers
+      ctx.fillRect(14, 34, 4, 12);
+      strokeRect(ctx, 14, 34, 4, 12);
+      // Three triangle tiers
       ctx.fillStyle = '#2E7D32';
-      ctx.beginPath(); ctx.moveTo(32, 5); ctx.lineTo(52, 40); ctx.lineTo(12, 40); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(16, 2); ctx.lineTo(26, 18); ctx.lineTo(6, 18); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#333333'; ctx.lineWidth = LW; ctx.stroke();
       ctx.fillStyle = '#388E3C';
-      ctx.beginPath(); ctx.moveTo(32, 20); ctx.lineTo(56, 55); ctx.lineTo(8, 55); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(16, 12); ctx.lineTo(28, 28); ctx.lineTo(4, 28); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#333333'; ctx.lineWidth = LW; ctx.stroke();
       ctx.fillStyle = '#43A047';
-      ctx.beginPath(); ctx.moveTo(32, 35); ctx.lineTo(58, 65); ctx.lineTo(6, 65); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(16, 22); ctx.lineTo(30, 36); ctx.lineTo(2, 36); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#333333'; ctx.lineWidth = LW; ctx.stroke();
     }),
 
-    bush: draw(TILE_SIZE, TILE_SIZE, (ctx) => {
+    // bush: 16x16
+    bush: draw(16, 16, (ctx) => {
       ctx.fillStyle = '#4CAF50';
       ctx.beginPath();
-      ctx.arc(16, 22, 12, 0, Math.PI * 2);
+      ctx.arc(8, 10, 5, 0, Math.PI * 2);
       ctx.fill();
+      strokeCircle(ctx, 8, 10, 5);
       ctx.fillStyle = '#66BB6A';
       ctx.beginPath();
-      ctx.arc(12, 18, 8, 0, Math.PI * 2);
+      ctx.arc(5, 7, 3, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(20, 18, 8, 0, Math.PI * 2);
+      ctx.arc(11, 7, 3, 0, Math.PI * 2);
       ctx.fill();
     }),
 
-    bench: draw(TILE_SIZE * 2, TILE_SIZE, (ctx) => {
-      // Seat
+    // bench: 32x16
+    bench: draw(32, 16, (ctx) => {
+      // Backrest
       ctx.fillStyle = '#8D6E63';
-      ctx.fillRect(4, 14, 56, 6);
+      ctx.fillRect(2, 2, 28, 4);
+      strokeRect(ctx, 2, 2, 28, 4);
+      // Seat
+      ctx.fillStyle = '#A1887F';
+      ctx.fillRect(2, 7, 28, 4);
+      strokeRect(ctx, 2, 7, 28, 4);
       // Legs
       ctx.fillStyle = '#5D4037';
-      ctx.fillRect(8, 20, 4, 10);
-      ctx.fillRect(52, 20, 4, 10);
-      // Back rest
-      ctx.fillStyle = '#795548';
-      ctx.fillRect(4, 8, 56, 4);
-      ctx.fillRect(8, 4, 4, 14);
-      ctx.fillRect(52, 4, 4, 14);
+      ctx.fillRect(4, 11, 3, 4);
+      strokeRect(ctx, 4, 11, 3, 4);
+      ctx.fillRect(25, 11, 3, 4);
+      strokeRect(ctx, 25, 11, 3, 4);
     }),
 
-    flower_bed: draw(TILE_SIZE * 2, TILE_SIZE, (ctx) => {
+    // flower_bed: 32x16
+    flower_bed: draw(32, 16, (ctx) => {
       // Soil
       ctx.fillStyle = '#6D4C41';
-      ctx.fillRect(4, 18, 56, 12);
+      ctx.fillRect(2, 9, 28, 6);
+      strokeRect(ctx, 2, 9, 28, 6);
       // Flowers
-      const colors = ['#E91E63', '#FF9800', '#FFEB3B', '#9C27B0', '#2196F3'];
-      for (let i = 0; i < 5; i++) {
+      const colors = ['#E91E63', '#FF9800', '#FFEB3B', '#9C27B0'];
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = '#4CAF50';
+        ctx.fillRect(6 + i * 7, 6, 2, 5);
         ctx.fillStyle = colors[i];
         ctx.beginPath();
-        ctx.arc(10 + i * 11, 14, 5, 0, Math.PI * 2);
+        ctx.arc(7 + i * 7, 5, 3, 0, Math.PI * 2);
         ctx.fill();
-      }
-      // Stems
-      ctx.fillStyle = '#4CAF50';
-      for (let i = 0; i < 5; i++) {
-        ctx.fillRect(9 + i * 11, 14, 2, 8);
+        strokeCircle(ctx, 7 + i * 7, 5, 3);
       }
     }),
 
-    cage: draw(TILE_SIZE * 2, TILE_SIZE * 2, (ctx) => {
-      // Floor
+    // cage: 32x32
+    cage: draw(32, 32, (ctx) => {
+      // Frame outline
       ctx.fillStyle = '#BDBDBD';
-      ctx.fillRect(4, 48, 56, 12);
-      // Bars
+      ctx.fillRect(2, 2, 28, 28);
+      strokeRect(ctx, 2, 2, 28, 28);
+      // Vertical bars
       ctx.strokeStyle = '#757575';
-      ctx.lineWidth = 2;
-      for (let i = 0; i < 7; i++) {
-        const bx = 8 + i * 8;
-        ctx.beginPath(); ctx.moveTo(bx, 12); ctx.lineTo(bx, 48); ctx.stroke();
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i <= 4; i++) {
+        const bx = 4 + i * 5;
+        ctx.beginPath(); ctx.moveTo(bx, 2); ctx.lineTo(bx, 30); ctx.stroke();
       }
-      // Top bar
-      ctx.beginPath(); ctx.moveTo(8, 12); ctx.lineTo(56, 12); ctx.stroke();
-      // Open door hint
-      ctx.fillStyle = '#E0E0E0';
-      ctx.fillRect(24, 24, 16, 24);
+      // Floor
+      ctx.strokeStyle = '#333333';
+      ctx.lineWidth = LW;
+      ctx.beginPath(); ctx.moveTo(2, 24); ctx.lineTo(30, 24); ctx.stroke();
     }),
 
-    treatment_table: draw(TILE_SIZE * 2, TILE_SIZE * 2, (ctx) => {
-      // Table top
+    // treatment_table: 32x32
+    treatment_table: draw(32, 32, (ctx) => {
+      // Table surface
       ctx.fillStyle = '#CFD8DC';
-      ctx.fillRect(4, 20, 56, 8);
+      ctx.fillRect(2, 10, 28, 8);
+      strokeRect(ctx, 2, 10, 28, 8);
       // Legs
       ctx.fillStyle = '#90A4AE';
-      ctx.fillRect(8, 28, 4, 32);
-      ctx.fillRect(52, 28, 4, 32);
-      ctx.fillRect(28, 28, 4, 32);
-      // Surface detail
-      ctx.fillStyle = '#B0BEC5';
-      ctx.fillRect(8, 20, 48, 2);
+      ctx.fillRect(4, 18, 4, 12);
+      strokeRect(ctx, 4, 18, 4, 12);
+      ctx.fillRect(24, 18, 4, 12);
+      strokeRect(ctx, 24, 18, 4, 12);
     }),
 
-    counter: draw(TILE_SIZE * 2, TILE_SIZE * 2, (ctx) => {
-      // Main body
-      ctx.fillStyle = '#8D6E63';
-      ctx.fillRect(4, 16, 56, 44);
+    // counter: 32x32
+    counter: draw(32, 32, (ctx) => {
+      // Body
+      ctx.fillStyle = '#795548';
+      ctx.fillRect(2, 8, 28, 22);
+      strokeRect(ctx, 2, 8, 28, 22);
       // Top surface
       ctx.fillStyle = '#A1887F';
-      ctx.fillRect(2, 12, 60, 8);
-      // Front panel lines
-      ctx.strokeStyle = '#6D4C41';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(32, 20); ctx.lineTo(32, 60);
-      ctx.stroke();
+      ctx.fillRect(1, 5, 30, 6);
+      strokeRect(ctx, 1, 5, 30, 6);
+      // Center divider
+      ctx.strokeStyle = '#5D4037';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(16, 11); ctx.lineTo(16, 30); ctx.stroke();
     }),
 
-    shelf: draw(TILE_SIZE * 2, TILE_SIZE * 2, (ctx) => {
+    // shelf: 32x32
+    shelf: draw(32, 32, (ctx) => {
       // Back panel
       ctx.fillStyle = '#8D6E63';
-      ctx.fillRect(4, 0, 56, 64);
-      // Shelves
+      ctx.fillRect(2, 2, 28, 28);
+      strokeRect(ctx, 2, 2, 28, 28);
+      // Three shelves
       ctx.fillStyle = '#A1887F';
       for (let i = 0; i < 3; i++) {
-        ctx.fillRect(2, 12 + i * 18, 60, 4);
+        ctx.fillRect(2, 4 + i * 9, 28, 3);
+        strokeRect(ctx, 2, 4 + i * 9, 28, 3);
       }
-      // Bags on shelves
+      // Items on shelves (small colored rects)
       ctx.fillStyle = '#FFF9C4';
-      ctx.fillRect(10, 2, 12, 10);
-      ctx.fillRect(30, 2, 12, 10);
+      ctx.fillRect(5, 1, 5, 3);
       ctx.fillStyle = '#FFCC80';
-      ctx.fillRect(12, 20, 10, 12);
-      ctx.fillRect(38, 20, 10, 12);
+      ctx.fillRect(14, 10, 5, 3);
       ctx.fillStyle = '#C8E6C9';
-      ctx.fillRect(14, 38, 10, 10);
+      ctx.fillRect(5, 19, 5, 3);
     }),
 
-    food_bowl: draw(TILE_SIZE, TILE_SIZE / 2, (ctx) => {
-      // Bowl
+    // food_bowl: 12x12
+    food_bowl: draw(12, 12, (ctx) => {
       ctx.fillStyle = '#FF8A65';
       ctx.beginPath();
-      ctx.ellipse(16, 10, 12, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(6, 8, 5, 3, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Food inside
+      ctx.strokeStyle = '#333333'; ctx.lineWidth = LW; ctx.stroke();
       ctx.fillStyle = '#8D6E63';
       ctx.beginPath();
-      ctx.ellipse(16, 8, 9, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(6, 7, 3, 2, 0, 0, Math.PI * 2);
       ctx.fill();
     }),
 
-    water_bowl: draw(TILE_SIZE, TILE_SIZE / 2, (ctx) => {
-      // Bowl
+    // water_bowl: 12x12
+    water_bowl: draw(12, 12, (ctx) => {
       ctx.fillStyle = '#90CAF9';
       ctx.beginPath();
-      ctx.ellipse(16, 10, 12, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(6, 8, 5, 3, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Water surface
+      ctx.strokeStyle = '#333333'; ctx.lineWidth = LW; ctx.stroke();
       ctx.fillStyle = '#42A5F5';
       ctx.beginPath();
-      ctx.ellipse(16, 8, 9, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(6, 7, 3, 2, 0, 0, Math.PI * 2);
       ctx.fill();
     }),
 
-    climbing_tree: draw(TILE_SIZE, TILE_SIZE * 2, (ctx) => {
-      // Post
+    // climbing_tree: 16x48
+    climbing_tree: draw(16, 48, (ctx) => {
+      // Central post
       ctx.fillStyle = '#8D6E63';
-      ctx.fillRect(12, 8, 8, 56);
-      // Platforms
-      ctx.fillStyle = '#A1887F';
-      ctx.fillRect(2, 6, 28, 6);
-      ctx.fillRect(4, 28, 24, 6);
-      ctx.fillRect(0, 50, 32, 6);
-      // Carpet on platforms
-      ctx.fillStyle = '#CE93D8';
-      ctx.fillRect(4, 6, 24, 3);
-      ctx.fillRect(6, 28, 20, 3);
-      ctx.fillRect(2, 50, 28, 3);
+      ctx.fillRect(6, 4, 4, 40);
+      strokeRect(ctx, 6, 4, 4, 40);
+      // Three platforms
+      const platY = [4, 18, 34];
+      for (const py of platY) {
+        ctx.fillStyle = '#A1887F';
+        ctx.fillRect(1, py, 14, 4);
+        strokeRect(ctx, 1, py, 14, 4);
+        // Carpet strip
+        ctx.fillStyle = '#CE93D8';
+        ctx.fillRect(2, py, 12, 2);
+      }
     }),
   };
 
+  _decoCache = sheet;
   return _decoCache;
 }
