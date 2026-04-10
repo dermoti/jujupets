@@ -71,7 +71,11 @@ export function createRenderer(canvas, tileMap) {
   skyGradient.addColorStop(0, '#87CEEB');
   skyGradient.addColorStop(1, '#B3E5FC');
 
+  // Water animation timer (accumulated from dt, pauseable)
+  let waterTime = 0;
+
   function render(state, camera, dt) {
+    waterTime += dt;
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, W, H);
 
@@ -89,7 +93,7 @@ export function createRenderer(canvas, tileMap) {
 
         let tileCanvas;
         if (tileType === 'water') {
-          const waterFrame = Math.floor(Date.now() / 500) % 3;
+          const waterFrame = Math.floor(waterTime / 500) % 3;
           tileCanvas = tileCache.water[waterFrame];
         } else if (tileType === 'grass') {
           const v = (col * 7 + row * 13) % 3;
