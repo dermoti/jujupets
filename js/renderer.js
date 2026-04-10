@@ -36,7 +36,7 @@ export function createRenderer(canvas, tileMap) {
   const bottomMost = worldToScreen(MAP_COLS - 1, MAP_ROWS - 1, TILE_W, TILE_H);
   const mapOffsetX = -leftMost.x + TILE_W / 2;
   const mapOffsetY = 0;
-  const worldPixelW = rightMost.x - leftMost.x + TILE_W + mapOffsetX;
+  const worldPixelW = rightMost.x - leftMost.x + TILE_W;
   const worldPixelH = bottomMost.y + TILE_H * 3;
 
   function getWorldSize() {
@@ -66,12 +66,13 @@ export function createRenderer(canvas, tileMap) {
     return { col: 6 + (staff.id % 3), row: 17 };
   }
 
+  // Cache sky gradient once
+  const skyGradient = ctx.createLinearGradient(0, 0, 0, H);
+  skyGradient.addColorStop(0, '#87CEEB');
+  skyGradient.addColorStop(1, '#B3E5FC');
+
   function render(state, camera, dt) {
-    // Sky gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, H);
-    gradient.addColorStop(0, '#87CEEB');
-    gradient.addColorStop(1, '#B3E5FC');
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, W, H);
 
     const renderables = [];

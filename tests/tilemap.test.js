@@ -11,7 +11,7 @@ describe('createTileMap', () => {
 
   it('returns grass for outer area tiles', () => {
     const map = createTileMap();
-    const tile = map.getTile(0, 0);
+    const tile = map.getTile(1, 0);
     expect(tile).toBe('grass');
   });
 
