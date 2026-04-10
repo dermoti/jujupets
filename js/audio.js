@@ -16,6 +16,17 @@ function saveSettings(settings) {
   } catch (e) { /* ignore */ }
 }
 
+function createNoiseBuffer(ctx, duration) {
+  const sampleRate = ctx.sampleRate;
+  const length = sampleRate * duration;
+  const buffer = ctx.createBuffer(1, length, sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < length; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  return buffer;
+}
+
 export function createAudioEngine() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -98,8 +109,151 @@ export function createAudioEngine() {
       if (ctx.state === 'suspended') ctx.resume();
     },
 
-    // Placeholders filled in Features 2-4
-    playSfx(name) { /* Feature 2 */ },
+    // SFX registry (Feature 2)
+    playSfx(name) {
+      if (muted) return;
+      const now = ctx.currentTime;
+
+      const sfxRegistry = new Map([
+        ['click', () => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = 1000;
+          g.gain.setValueAtTime(0.3, now);
+          g.gain.linearRampToValueAtTime(0, now + 0.05);
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        }],
+        ['dialog_open', () => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.linearRampToValueAtTime(800, now + 0.1);
+          g.gain.value = 0.2;
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        }],
+        ['dialog_close', () => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.linearRampToValueAtTime(400, now + 0.1);
+          g.gain.value = 0.2;
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        }],
+        ['adopt_fanfare', () => {
+          const notes = [523, 659, 784, 1047];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            g.gain.value = 0.25;
+            osc.connect(g);
+            g.connect(sfxGain);
+            const start = now + i * 0.1;
+            osc.start(start);
+            osc.stop(start + 0.1);
+          });
+        }],
+        ['cha_ching', () => {
+          [0, 0.05].forEach(offset => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 2000;
+            g.gain.value = 0.3;
+            osc.connect(g);
+            g.connect(sfxGain);
+            const start = now + offset;
+            osc.start(start);
+            osc.stop(start + 0.03);
+          });
+        }],
+        ['alert', () => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.value = 200;
+          g.gain.setValueAtTime(0.3, now);
+          g.gain.linearRampToValueAtTime(0, now + 0.2);
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        }],
+        ['bark', () => {
+          // Noise burst
+          const noiseSource = ctx.createBufferSource();
+          noiseSource.buffer = createNoiseBuffer(ctx, 0.08);
+          const noiseGain = ctx.createGain();
+          noiseGain.gain.value = 0.2;
+          noiseSource.connect(noiseGain);
+          noiseGain.connect(sfxGain);
+          noiseSource.start(now);
+          noiseSource.stop(now + 0.08);
+          // Overlapping sine
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = 300;
+          g.gain.value = 0.2;
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        }],
+        ['meow', () => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.linearRampToValueAtTime(400, now + 0.15);
+          g.gain.value = 0.15;
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        }],
+        ['chirp', () => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1500, now);
+          osc.frequency.linearRampToValueAtTime(2000, now + 0.05);
+          osc.frequency.linearRampToValueAtTime(1500, now + 0.1);
+          g.gain.value = 0.15;
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        }],
+        ['squeak', () => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = 1800;
+          g.gain.value = 0.2;
+          osc.connect(g);
+          g.connect(sfxGain);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        }],
+      ]);
+
+      const factory = sfxRegistry.get(name);
+      if (factory) factory();
+    },
     playMusic() { /* Feature 3 */ },
     stopMusic() { /* Feature 3 */ },
 

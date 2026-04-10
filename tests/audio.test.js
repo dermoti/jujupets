@@ -101,3 +101,36 @@ describe('localStorage persistence', () => {
     localStorage.removeItem('jujupets-audio');
   });
 });
+
+describe('SFX registry', () => {
+  const SFX_NAMES = [
+    'click', 'dialog_open', 'dialog_close', 'adopt_fanfare',
+    'cha_ching', 'alert', 'bark', 'meow', 'chirp', 'squeak'
+  ];
+
+  it('playSfx accepts all 10 registered sound names without throwing', () => {
+    const audio = createAudioEngine();
+    let threw = false;
+    try {
+      for (const name of SFX_NAMES) {
+        audio.playSfx(name);
+      }
+    } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+  });
+
+  it('playSfx handles unknown name gracefully (no throw)', () => {
+    const audio = createAudioEngine();
+    let threw = false;
+    try { audio.playSfx('nonexistent_sound'); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+  });
+
+  it('playSfx respects mute state (no throw when muted)', () => {
+    const audio = createAudioEngine();
+    audio.setMasterMute(true);
+    let threw = false;
+    try { audio.playSfx('click'); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+  });
+});
