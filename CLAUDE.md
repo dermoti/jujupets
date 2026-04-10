@@ -34,6 +34,8 @@ ES modules throughout (`<script type="module">`). Canvas (640x480) for pixel-art
 - `js/tile-factory.js` — procedural tile graphics drawn into offscreen canvases
 - `js/sprite-factory.js` — procedural animal and staff sprite sheets with animation frames
 - `js/sprites.js` — animation state controller for frame timing and animation selection
+- `js/movement.js` — entity movement: animal random-walk within zones, staff waypoint navigation along paths
+- `js/particles.js` — particle effects: hearts (happy), stars (adoption), notes (birds), sparkles (working/feeding)
 
 ## Testing
 
