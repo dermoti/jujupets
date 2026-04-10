@@ -14,7 +14,7 @@ JujuPets — Kairosoft-style real-time animal shelter management sim. Pure vanil
 
 ## Architecture
 
-ES modules throughout (`<script type="module">`). Canvas (640x480) for pixel-art shelter view, DOM overlays for UI.
+ES modules throughout (`<script type="module">`). Canvas (680x500) for pixel-art shelter view, DOM overlays for UI.
 
 - `js/main.js` — bootstrap, wires engine + state + renderer + ui + simulation, handles dialogs
 - `js/engine.js` — rAF game loop, speed control (pause/x1/x2/x3), tick dispatch
@@ -28,7 +28,7 @@ ES modules throughout (`<script type="module">`). Canvas (640x480) for pixel-art
 - `js/simulation.js` — orchestrates one sim tick: animals → staff → owners → events → milestones
 - `js/renderer.js` — canvas rendering of shelter grid, animals, staff
 - `js/ui.js` — DOM overlay management: stats bar, panels, ticker, dialogs
-- `js/iso.js` — isometric coordinate transforms (worldToScreen, screenToWorld, depthKey)
+- `js/grid.js` — top-down grid coordinate transforms (toScreen, toGrid, TILE_SIZE, MAP_COLS, MAP_ROWS)
 - `js/camera.js` — camera viewport with WASD/drag scrolling and bounds clamping
 - `js/tilemap.js` — 24x24 tile map with zone definitions (dogRun, building, catEnclosure, etc.)
 - `js/tile-factory.js` — procedural tile graphics drawn into offscreen canvases

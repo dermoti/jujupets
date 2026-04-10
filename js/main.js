@@ -23,8 +23,8 @@ const renderer = createRenderer(canvas, tileMap, movementSystem, particleSystem)
 const worldSize = renderer.getWorldSize();
 const camera = createCamera(canvas.width, canvas.height, worldSize.w, worldSize.h);
 
-const buildingCenter = worldToScreen(7, 13, TILE_W, TILE_H);
-camera.centerOn(buildingCenter.x + worldSize.w / 4, buildingCenter.y);
+const buildingCenter = toScreen(7, 13);
+camera.centerOn(buildingCenter.x, buildingCenter.y);
 
 const audio = createAudioEngine();
 
@@ -113,8 +113,8 @@ engine.onTick = (ticks) => {
   for (const animal of state.animals) {
     const pos = movementSystem.getPosition(animal.id);
     if (!pos) continue;
-    const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
-    const sx = screen.x + worldSize.w / 4 - camera.x + TILE_W / 2;
+    const screen = toScreen(pos.col, pos.row);
+    const sx = screen.x - camera.x + TILE_SIZE / 2;
     const sy = screen.y - camera.y;
     // Happy animals: 1% chance per tick emit 1 heart
     if (animal.happiness > 0.7 && Math.random() < 0.01) {
@@ -142,8 +142,8 @@ engine.onTick = (ticks) => {
     if (!staff._working) continue;
     const pos = movementSystem.getPosition(staff.id);
     if (!pos) continue;
-    const screen = worldToScreen(pos.col, pos.row, TILE_W, TILE_H);
-    const sx = screen.x + worldSize.w / 4 - camera.x + TILE_W / 2;
+    const screen = toScreen(pos.col, pos.row);
+    const sx = screen.x - camera.x + TILE_SIZE / 2;
     const sy = screen.y - camera.y;
     // Working staff: 1.5% chance per tick emit 1 sparkle
     if (Math.random() < 0.015) {
@@ -250,8 +250,8 @@ function showAnimalSelectDialog(owner) {
       audio.playSfx('cha_ching');
       const adoptPos = movementSystem.getPosition(animal.id);
       if (adoptPos) {
-        const adoptScreen = worldToScreen(adoptPos.col, adoptPos.row, TILE_W, TILE_H);
-        particleSystem.emit('star', adoptScreen.x + worldSize.w / 4 - camera.x + TILE_W / 2, adoptScreen.y - camera.y, 5);
+        const adoptScreen = toScreen(adoptPos.col, adoptPos.row);
+        particleSystem.emit('star', adoptScreen.x - camera.x + TILE_SIZE / 2, adoptScreen.y - camera.y, 5);
       }
       movementSystem.removeEntity(animal.id);
       state.tickerMessages.push(`${animal.name} vermittelt an ${owner.name}! Match: ${Math.floor(score)}%, Geb\u00fchr: $${result.fee}`);
@@ -278,8 +278,8 @@ function showShopDialog() {
         animal.needs[need] = Math.min(1, animal.needs[need] + 0.3);
         const shopPos = movementSystem.getPosition(animal.id);
         if (shopPos) {
-          const shopScreen = worldToScreen(shopPos.col, shopPos.row, TILE_W, TILE_H);
-          particleSystem.emit('sparkle', shopScreen.x + worldSize.w / 4 - camera.x + TILE_W / 2, shopScreen.y - camera.y, 1);
+          const shopScreen = toScreen(shopPos.col, shopPos.row);
+          particleSystem.emit('sparkle', shopScreen.x - camera.x + TILE_SIZE / 2, shopScreen.y - camera.y, 1);
         }
       }
       state.tickerMessages.push(`${item === 'food' ? 'Futter' : 'Medizin'} eingekauft!`);
