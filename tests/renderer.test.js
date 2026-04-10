@@ -1,5 +1,5 @@
 import { describe, it, expect } from '../js/test-runner.js';
-import { worldToScreen, TILE_W, TILE_H, MAP_COLS, MAP_ROWS } from '../js/iso.js';
+import { toScreen, TILE_SIZE, MAP_COLS, MAP_ROWS } from '../js/grid.js';
 
 describe('Isometric renderer math', () => {
   it('map pixel dimensions are consistent', () => {

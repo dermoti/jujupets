@@ -1,0 +1,158 @@
+<h2>Farbpalette / Stimmung</h2>
+<p class="subtitle">Drei Richtungen für das isometrische Tierheim — klicke auf deine Favorit</p>
+
+<div class="cards">
+  <div class="card" data-choice="warm" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:200px;position:relative;overflow:hidden;border-radius:4px 4px 0 0;">
+      <!-- Warm & einladend -->
+      <svg viewBox="0 0 300 200" style="width:100%;height:100%;">
+        <!-- Himmel -->
+        <rect width="300" height="200" fill="#87CEEB"/>
+        <circle cx="250" cy="40" r="25" fill="#FFD700" opacity="0.9"/>
+        <!-- Wiese -->
+        <polygon points="0,120 300,120 300,200 0,200" fill="#7CB342"/>
+        <polygon points="0,130 300,130 300,200 0,200" fill="#689F38"/>
+        <!-- Holzgebäude iso -->
+        <polygon points="150,60 260,100 150,140 40,100" fill="#D7A86E"/>
+        <polygon points="40,100 150,140 150,190 40,150" fill="#C49155"/>
+        <polygon points="150,140 260,100 260,150 150,190" fill="#B8834A"/>
+        <!-- Dach -->
+        <polygon points="150,35 270,80 150,120 30,80" fill="#8B4513"/>
+        <polygon points="30,80 150,120 150,125 30,85" fill="#6B3410"/>
+        <polygon points="150,120 270,80 270,85 150,125" fill="#7A3B11"/>
+        <!-- Tür -->
+        <rect x="130" y="145" width="20" height="30" rx="2" fill="#5D4037"/>
+        <!-- Blumen -->
+        <circle cx="70" cy="145" r="4" fill="#E91E63"/>
+        <circle cx="80" cy="148" r="3" fill="#FF9800"/>
+        <circle cx="230" cy="145" r="4" fill="#E91E63"/>
+        <circle cx="220" cy="148" r="3" fill="#FF9800"/>
+        <!-- Baum -->
+        <rect x="18" y="100" width="6" height="30" fill="#795548"/>
+        <circle cx="21" cy="90" r="15" fill="#4CAF50"/>
+        <circle cx="15" cy="95" r="10" fill="#388E3C"/>
+        <!-- Hund (pixelig) -->
+        <rect x="90" y="152" width="10" height="8" rx="1" fill="#C8A070"/>
+        <rect x="87" y="150" width="6" height="6" rx="1" fill="#C8A070"/>
+        <rect x="86" y="148" width="2" height="2" fill="#C8A070"/>
+        <rect x="88" y="151" width="1" height="1" fill="#333"/>
+        <!-- Katze -->
+        <rect x="200" y="154" width="8" height="6" rx="1" fill="#9E9E9E"/>
+        <rect x="197" y="152" width="5" height="5" rx="1" fill="#9E9E9E"/>
+        <rect x="196" y="150" width="2" height="2" fill="#9E9E9E"/>
+        <rect x="203" y="150" width="2" height="2" fill="#9E9E9E"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>Warm & einladend</h3>
+      <p>Erdtöne, Holz, Gras, Sonnenlicht. Ländlich-idyllisch. Fühlt sich an wie ein Zuhause.</p>
+      <div style="display:flex;gap:4px;margin-top:8px;">
+        <div style="width:24px;height:24px;background:#87CEEB;border-radius:3px;" title="Himmel"></div>
+        <div style="width:24px;height:24px;background:#7CB342;border-radius:3px;" title="Gras"></div>
+        <div style="width:24px;height:24px;background:#D7A86E;border-radius:3px;" title="Holz"></div>
+        <div style="width:24px;height:24px;background:#8B4513;border-radius:3px;" title="Dach"></div>
+        <div style="width:24px;height:24px;background:#C8A070;border-radius:3px;" title="Hund"></div>
+        <div style="width:24px;height:24px;background:#FFD700;border-radius:3px;" title="Sonne"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="modern" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:200px;position:relative;overflow:hidden;border-radius:4px 4px 0 0;">
+      <!-- Modern & clean -->
+      <svg viewBox="0 0 300 200" style="width:100%;height:100%;">
+        <!-- Hintergrund -->
+        <rect width="300" height="200" fill="#E8EAF6"/>
+        <!-- Boden -->
+        <polygon points="0,130 300,130 300,200 0,200" fill="#CFD8DC"/>
+        <polygon points="0,140 300,140 300,200 0,200" fill="#B0BEC5"/>
+        <!-- Gebäude iso -->
+        <polygon points="150,55 270,100 150,145 30,100" fill="#ECEFF1"/>
+        <polygon points="30,100 150,145 150,195 30,150" fill="#CFD8DC"/>
+        <polygon points="150,145 270,100 270,150 150,195" fill="#B0BEC5"/>
+        <!-- Dach -->
+        <polygon points="150,35 275,82 150,130 25,82" fill="#546E7A"/>
+        <polygon points="25,82 150,130 150,133 25,85" fill="#455A64"/>
+        <polygon points="150,130 275,82 275,85 150,133" fill="#37474F"/>
+        <!-- Fenster -->
+        <rect x="60" y="115" width="15" height="12" rx="1" fill="#42A5F5" opacity="0.7"/>
+        <rect x="95" y="122" width="15" height="12" rx="1" fill="#42A5F5" opacity="0.7"/>
+        <!-- Tür -->
+        <rect x="134" y="155" width="18" height="28" rx="2" fill="#42A5F5"/>
+        <!-- Grüner Akzent -->
+        <rect x="70" y="148" width="30" height="3" rx="1" fill="#66BB6A"/>
+        <rect x="200" y="148" width="30" height="3" rx="1" fill="#66BB6A"/>
+        <!-- Kreuz -->
+        <rect x="145" y="70" width="10" height="3" fill="#EF5350"/>
+        <rect x="148" y="67" width="3" height="9" fill="#EF5350"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>Modern & clean</h3>
+      <p>Helle, klinische Farben. Beton, Glas, Edelstahl. Professionell aber etwas kühl.</p>
+      <div style="display:flex;gap:4px;margin-top:8px;">
+        <div style="width:24px;height:24px;background:#E8EAF6;border-radius:3px;" title="Hintergrund"></div>
+        <div style="width:24px;height:24px;background:#CFD8DC;border-radius:3px;" title="Wände"></div>
+        <div style="width:24px;height:24px;background:#546E7A;border-radius:3px;" title="Dach"></div>
+        <div style="width:24px;height:24px;background:#42A5F5;border-radius:3px;" title="Akzent"></div>
+        <div style="width:24px;height:24px;background:#66BB6A;border-radius:3px;" title="Grün"></div>
+        <div style="width:24px;height:24px;background:#EF5350;border-radius:3px;" title="Kreuz"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="retro" onclick="toggleSelect(this)">
+    <div class="card-image" style="height:200px;position:relative;overflow:hidden;border-radius:4px 4px 0 0;">
+      <!-- Retro-Bunt -->
+      <svg viewBox="0 0 300 200" style="width:100%;height:100%;">
+        <!-- Himmel -->
+        <rect width="300" height="200" fill="#4FC3F7"/>
+        <!-- Wolken -->
+        <ellipse cx="60" cy="35" rx="25" ry="12" fill="white" opacity="0.8"/>
+        <ellipse cx="220" cy="45" rx="30" ry="10" fill="white" opacity="0.7"/>
+        <!-- Wiese -->
+        <polygon points="0,120 300,120 300,200 0,200" fill="#66BB6A"/>
+        <polygon points="0,135 300,135 300,200 0,200" fill="#43A047"/>
+        <!-- Gebäude iso bunt -->
+        <polygon points="150,55 265,100 150,145 35,100" fill="#FF7043"/>
+        <polygon points="35,100 150,145 150,195 35,150" fill="#E64A19"/>
+        <polygon points="150,145 265,100 265,150 150,195" fill="#D84315"/>
+        <!-- Dach gelb -->
+        <polygon points="150,30 275,80 150,130 25,80" fill="#FFCA28"/>
+        <polygon points="25,80 150,130 150,134 25,84" fill="#FFB300"/>
+        <polygon points="150,130 275,80 275,84 150,134" fill="#FFA000"/>
+        <!-- Fenster bunt -->
+        <rect x="58" y="113" width="14" height="11" rx="1" fill="#FFF9C4"/>
+        <rect x="92" y="120" width="14" height="11" rx="1" fill="#FFF9C4"/>
+        <rect x="186" y="113" width="14" height="11" rx="1" fill="#FFF9C4"/>
+        <rect x="220" y="120" width="14" height="11" rx="1" fill="#FFF9C4"/>
+        <!-- Tür -->
+        <rect x="133" y="155" width="18" height="28" rx="2" fill="#5C6BC0"/>
+        <!-- Schild -->
+        <rect x="125" y="40" width="50" height="16" rx="3" fill="#FFF"/>
+        <text x="150" y="52" font-size="8" fill="#E64A19" text-anchor="middle" font-family="monospace" font-weight="bold">JUJUPETS</text>
+        <!-- Bunte Tiere -->
+        <rect x="80" y="155" width="10" height="8" rx="1" fill="#FFB74D"/>
+        <rect x="78" y="153" width="6" height="5" rx="1" fill="#FFB74D"/>
+        <rect x="210" y="157" width="8" height="6" rx="1" fill="#CE93D8"/>
+        <rect x="208" y="155" width="5" height="5" rx="1" fill="#CE93D8"/>
+        <!-- Sterne -->
+        <text x="45" y="110" font-size="10" fill="#FFEB3B">★</text>
+        <text x="255" y="115" font-size="8" fill="#FFEB3B">★</text>
+        <text x="145" y="28" font-size="6" fill="#FFEB3B">★</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <h3>Retro-Bunt (Kairosoft)</h3>
+      <p>Leuchtend, satt, fröhlich. Vereinfacht aber charmant. Sterne, Herzen, bunte Akzente überall.</p>
+      <div style="display:flex;gap:4px;margin-top:8px;">
+        <div style="width:24px;height:24px;background:#4FC3F7;border-radius:3px;" title="Himmel"></div>
+        <div style="width:24px;height:24px;background:#66BB6A;border-radius:3px;" title="Gras"></div>
+        <div style="width:24px;height:24px;background:#FF7043;border-radius:3px;" title="Wände"></div>
+        <div style="width:24px;height:24px;background:#FFCA28;border-radius:3px;" title="Dach"></div>
+        <div style="width:24px;height:24px;background:#5C6BC0;border-radius:3px;" title="Tür"></div>
+        <div style="width:24px;height:24px;background:#CE93D8;border-radius:3px;" title="Akzent"></div>
+      </div>
+    </div>
+  </div>
+</div>

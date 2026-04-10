@@ -13,7 +13,7 @@ import { createStaff, assignStaff, unassignStaff } from './staff.js';
 import { calculateMatchScore, executeAdoption, createOwner } from './matching.js';
 import { enableEndless, calculateFinalScore } from './progression.js';
 import { SPECIES, STAFF_ROLES, BALANCING } from './data.js';
-import { worldToScreen, TILE_W, TILE_H } from './iso.js';
+import { toScreen, TILE_SIZE } from './grid.js';
 
 const canvas = document.getElementById('shelter-canvas');
 const tileMap = createTileMap();

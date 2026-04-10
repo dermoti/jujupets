@@ -1,4 +1,4 @@
-import { MAP_COLS, MAP_ROWS } from './iso.js';
+import { MAP_COLS, MAP_ROWS } from './grid.js';
 
 export const ZONES = {
   dogRun:       { minCol: 3,  maxCol: 10, minRow: 1,  maxRow: 6,  id: 'dogRun' },

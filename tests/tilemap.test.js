@@ -1,6 +1,6 @@
 import { describe, it, expect } from '../js/test-runner.js';
 import { createTileMap, ZONES } from '../js/tilemap.js';
-import { MAP_COLS, MAP_ROWS } from '../js/iso.js';
+import { MAP_COLS, MAP_ROWS } from '../js/grid.js';
 
 describe('createTileMap', () => {
   it('has correct dimensions', () => {

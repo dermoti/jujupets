@@ -1,0 +1,66 @@
+<h2>JujuPets — 3 technische Ansätze</h2>
+<p class="subtitle">Basierend auf: Echtzeit-Sim, Pixel-Art, Aufnahme→Pflege→Vermittlung Loop, 4 Ressourcen, Matching-System, Story+Endlos</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Pure HTML5 Canvas + Vanilla JS (Empfohlen)</h3>
+      <p><strong>Wie Game Dev Story:</strong> Ein Canvas für die Pixel-Art-Welt, DOM-Overlays für Menüs/Stats. Kein Framework-Overhead.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Vorteile</h4><ul>
+          <li>Volle Kontrolle über Rendering</li>
+          <li>Kein Build-Schritt nötig — sofort spielbar</li>
+          <li>Perfekt für Pixel-Art (crisp rendering)</li>
+          <li>Leichtgewichtig, schnell zu iterieren</li>
+        </ul></div>
+        <div class="cons"><h4>Nachteile</h4><ul>
+          <li>Kein Ökosystem — alles selbst bauen (Game Loop, UI, State)</li>
+          <li>Wird bei Komplexität unübersichtlich ohne gute Architektur</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Phaser 3 (HTML5 Game Framework)</h3>
+      <p>Etabliertes 2D-Game-Framework mit Scene-Management, Sprite-System, Tween-Engine und Input-Handling.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Vorteile</h4><ul>
+          <li>Eingebaute Game Loop, Szenen, Sprites, Animationen</li>
+          <li>Große Community, viele Tutorials</li>
+          <li>Tilemap-Support für Tierheim-Layout</li>
+          <li>Plugin-System für Erweiterungen</li>
+        </ul></div>
+        <div class="cons"><h4>Nachteile</h4><ul>
+          <li>~1MB Framework-Größe</li>
+          <li>Overkill für eine Sim ohne Physik/Action</li>
+          <li>UI-System ist schwach — DOM-Overlay trotzdem nötig</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>DOM-basiert mit CSS Pixel-Art</h3>
+      <p>Komplett HTML/CSS/JS ohne Canvas. Pixel-Art-Stil über CSS (image-rendering: pixelated, Grid-Layouts, Sprite-Sheets als Hintergründe).</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Vorteile</h4><ul>
+          <li>Einfachste UI-Entwicklung — natürliche DOM-Elemente</li>
+          <li>Volle Zugänglichkeit (Accessibility)</li>
+          <li>Responsiv ohne extra Aufwand</li>
+          <li>Leicht zu debuggen (Browser DevTools)</li>
+        </ul></div>
+        <div class="cons"><h4>Nachteile</h4><ul>
+          <li>Animationen weniger flüssig als Canvas</li>
+          <li>Pixel-Art-Feeling schwerer zu erreichen</li>
+          <li>Performance bei vielen animierten Elementen</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>

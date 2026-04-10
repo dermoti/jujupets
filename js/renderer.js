@@ -1,4 +1,4 @@
-import { worldToScreen, depthKey, TILE_W, TILE_H, MAP_COLS, MAP_ROWS } from './iso.js';
+import { toScreen, TILE_SIZE, MAP_COLS, MAP_ROWS } from './grid.js';
 import { createTileCache } from './tile-factory.js';
 import { createAnimalSpriteSheet, createStaffSpriteSheet, createDecoSpriteSheet, ANIMAL_SPRITE, STAFF_SPRITE } from './sprite-factory.js';
 import { createAnimState, animalAnimFromStats, staffAnimFromState } from './sprites.js';

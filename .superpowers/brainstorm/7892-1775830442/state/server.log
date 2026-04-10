@@ -1,0 +1,4 @@
+{"type":"server-started","port":60385,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:60385","screen_dir":"/Users/dermoti/Sites/jujupets/.superpowers/brainstorm/7892-1775830442/content","state_dir":"/Users/dermoti/Sites/jujupets/.superpowers/brainstorm/7892-1775830442/state"}
+{"type":"screen-added","file":"/Users/dermoti/Sites/jujupets/.superpowers/brainstorm/7892-1775830442/content/full-ui-preview.html"}
+{"type":"screen-added","file":"/Users/dermoti/Sites/jujupets/.superpowers/brainstorm/7892-1775830442/content/detail-closeups.html"}
+{"type":"server-stopped","reason":"idle timeout"}

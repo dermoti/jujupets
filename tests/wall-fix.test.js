@@ -1,12 +1,12 @@
 import { describe, it, expect } from '../js/test-runner.js';
 import { createTileCache } from '../js/tile-factory.js';
-import { TILE_W, TILE_H } from '../js/iso.js';
+import { TILE_SIZE } from '../js/grid.js';
 
 describe('Wall-tile fix', () => {
   it('wall_back top-left quadrant has roof color, not wall color', () => {
     const cache = createTileCache();
     const ctx = cache.wall_back.getContext('2d');
-    const pixel = ctx.getImageData(TILE_W / 2, TILE_H / 2 - 2, 1, 1).data;
+    const pixel = ctx.getImageData(TILE_SIZE / 2, TILE_SIZE / 2 - 2, 1, 1).data;
     expect(pixel[0]).toBe(139);
     expect(pixel[1]).toBe(69);
     expect(pixel[2]).toBe(19);
@@ -16,8 +16,8 @@ describe('Wall-tile fix', () => {
     const cache = createTileCache();
     const ctx = cache.wall_back.getContext('2d');
     const wallH = cache.wall_back.height;
-    const sampleY = TILE_H + Math.floor((wallH - TILE_H) / 2);
-    const pixel = ctx.getImageData(TILE_W / 2 + 8, sampleY, 1, 1).data;
+    const sampleY = TILE_SIZE + Math.floor((wallH - TILE_SIZE) / 2);
+    const pixel = ctx.getImageData(TILE_SIZE / 2 + 8, sampleY, 1, 1).data;
     expect(pixel[0]).toBe(196);
     expect(pixel[1]).toBe(145);
     expect(pixel[2]).toBe(85);
@@ -26,7 +26,7 @@ describe('Wall-tile fix', () => {
   it('wall_left wall face occupies area below diamond only', () => {
     const cache = createTileCache();
     const ctx = cache.wall_left.getContext('2d');
-    const pixel = ctx.getImageData(TILE_W / 2, TILE_H / 2, 1, 1).data;
+    const pixel = ctx.getImageData(TILE_SIZE / 2, TILE_SIZE / 2, 1, 1).data;
     expect(pixel[0]).toBe(196);
     expect(pixel[1]).toBe(145);
     expect(pixel[2]).toBe(85);
@@ -35,7 +35,7 @@ describe('Wall-tile fix', () => {
   it('wall_right wall face occupies area below diamond only', () => {
     const cache = createTileCache();
     const ctx = cache.wall_right.getContext('2d');
-    const pixel = ctx.getImageData(TILE_W / 2, TILE_H / 2, 1, 1).data;
+    const pixel = ctx.getImageData(TILE_SIZE / 2, TILE_SIZE / 2, 1, 1).data;
     expect(pixel[0]).toBe(184);
     expect(pixel[1]).toBe(131);
     expect(pixel[2]).toBe(74);

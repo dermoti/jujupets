@@ -1,4 +1,4 @@
-import { TILE_W, TILE_H } from './iso.js';
+import { TILE_SIZE } from './grid.js';
 
 function makeCanvas(w, h) {
   const c = document.createElement('canvas');
@@ -31,11 +31,11 @@ function drawDiamondOutline(ctx, w, h, color) {
 }
 
 function drawGrass(variant) {
-  const c = makeCanvas(TILE_W, TILE_H);
+  const c = makeCanvas(TILE_SIZE, TILE_SIZE);
   const ctx = c.getContext('2d');
   const colors = ['#7CB342', '#689F38', '#8BC34A'];
-  drawDiamond(ctx, TILE_W, TILE_H, colors[variant % 3]);
-  drawDiamondOutline(ctx, TILE_W, TILE_H, '#558B2F');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, colors[variant % 3]);
+  drawDiamondOutline(ctx, TILE_SIZE, TILE_SIZE, '#558B2F');
   ctx.fillStyle = '#9CCC65';
   for (let i = 0; i < 5; i++) {
     const gx = 16 + Math.floor(Math.sin(i * 2.1 + variant) * 12);
@@ -58,10 +58,10 @@ function drawGrassFlower() {
 }
 
 function drawPath() {
-  const c = makeCanvas(TILE_W, TILE_H);
+  const c = makeCanvas(TILE_SIZE, TILE_SIZE);
   const ctx = c.getContext('2d');
-  drawDiamond(ctx, TILE_W, TILE_H, '#D7A86E');
-  drawDiamondOutline(ctx, TILE_W, TILE_H, '#C49155');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, '#D7A86E');
+  drawDiamondOutline(ctx, TILE_SIZE, TILE_SIZE, '#C49155');
   ctx.fillStyle = '#E0C8A0';
   for (let i = 0; i < 4; i++) {
     const px = 20 + i * 8;
@@ -72,10 +72,10 @@ function drawPath() {
 }
 
 function drawFloor() {
-  const c = makeCanvas(TILE_W, TILE_H);
+  const c = makeCanvas(TILE_SIZE, TILE_SIZE);
   const ctx = c.getContext('2d');
-  drawDiamond(ctx, TILE_W, TILE_H, '#C49155');
-  drawDiamondOutline(ctx, TILE_W, TILE_H, '#A0724A');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, '#C49155');
+  drawDiamondOutline(ctx, TILE_SIZE, TILE_SIZE, '#A0724A');
   ctx.strokeStyle = '#B8834A';
   ctx.lineWidth = 0.5;
   ctx.beginPath();
@@ -88,68 +88,68 @@ function drawFloor() {
 
 function drawWallBack() {
   const wallH = 48;
-  const c = makeCanvas(TILE_W, wallH);
+  const c = makeCanvas(TILE_SIZE, wallH);
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#D7A86E';
   ctx.beginPath();
-  ctx.moveTo(0, TILE_H / 2);
-  ctx.lineTo(TILE_W / 2, TILE_H);
-  ctx.lineTo(TILE_W / 2, wallH);
-  ctx.lineTo(0, wallH - TILE_H / 2);
+  ctx.moveTo(0, TILE_SIZE / 2);
+  ctx.lineTo(TILE_SIZE / 2, TILE_SIZE);
+  ctx.lineTo(TILE_SIZE / 2, wallH);
+  ctx.lineTo(0, wallH - TILE_SIZE / 2);
   ctx.closePath();
   ctx.fill();
   ctx.fillStyle = '#C49155';
   ctx.beginPath();
-  ctx.moveTo(TILE_W / 2, TILE_H);
-  ctx.lineTo(TILE_W, TILE_H / 2);
-  ctx.lineTo(TILE_W, wallH - TILE_H / 2);
-  ctx.lineTo(TILE_W / 2, wallH);
+  ctx.moveTo(TILE_SIZE / 2, TILE_SIZE);
+  ctx.lineTo(TILE_SIZE, TILE_SIZE / 2);
+  ctx.lineTo(TILE_SIZE, wallH - TILE_SIZE / 2);
+  ctx.lineTo(TILE_SIZE / 2, wallH);
   ctx.closePath();
   ctx.fill();
-  drawDiamond(ctx, TILE_W, TILE_H, '#8B4513');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, '#8B4513');
   return c;
 }
 
 function drawWallLeft() {
   const wallH = 48;
-  const c = makeCanvas(TILE_W, wallH);
+  const c = makeCanvas(TILE_SIZE, wallH);
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#C49155';
   ctx.beginPath();
-  ctx.moveTo(0, TILE_H / 2);
-  ctx.lineTo(TILE_W / 2, TILE_H);
-  ctx.lineTo(TILE_W / 2, wallH);
-  ctx.lineTo(0, wallH - TILE_H / 2);
+  ctx.moveTo(0, TILE_SIZE / 2);
+  ctx.lineTo(TILE_SIZE / 2, TILE_SIZE);
+  ctx.lineTo(TILE_SIZE / 2, wallH);
+  ctx.lineTo(0, wallH - TILE_SIZE / 2);
   ctx.closePath();
   ctx.fill();
-  drawDiamond(ctx, TILE_W, TILE_H, '#C49155');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, '#C49155');
   return c;
 }
 
 function drawWallRight() {
   const wallH = 48;
-  const c = makeCanvas(TILE_W, wallH);
+  const c = makeCanvas(TILE_SIZE, wallH);
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#B8834A';
   ctx.beginPath();
-  ctx.moveTo(TILE_W / 2, TILE_H);
-  ctx.lineTo(TILE_W, TILE_H / 2);
-  ctx.lineTo(TILE_W, wallH - TILE_H / 2);
-  ctx.lineTo(TILE_W / 2, wallH);
+  ctx.moveTo(TILE_SIZE / 2, TILE_SIZE);
+  ctx.lineTo(TILE_SIZE, TILE_SIZE / 2);
+  ctx.lineTo(TILE_SIZE, wallH - TILE_SIZE / 2);
+  ctx.lineTo(TILE_SIZE / 2, wallH);
   ctx.closePath();
   ctx.fill();
-  drawDiamond(ctx, TILE_W, TILE_H, '#B8834A');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, '#B8834A');
   return c;
 }
 
 function drawFence() {
   const fenceH = 40;
-  const c = makeCanvas(TILE_W, fenceH);
+  const c = makeCanvas(TILE_SIZE, fenceH);
   const ctx = c.getContext('2d');
-  const baseY = fenceH - TILE_H;
+  const baseY = fenceH - TILE_SIZE;
   ctx.save();
   ctx.translate(0, baseY);
-  drawDiamond(ctx, TILE_W, TILE_H, '#689F38');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, '#689F38');
   ctx.restore();
   ctx.fillStyle = '#8B4513';
   ctx.fillRect(10, baseY - 8, 3, 16);
@@ -162,17 +162,17 @@ function drawFence() {
 }
 
 function drawWaterFrame(waveOffset) {
-  const c = makeCanvas(TILE_W, TILE_H);
+  const c = makeCanvas(TILE_SIZE, TILE_SIZE);
   const ctx = c.getContext('2d');
-  drawDiamond(ctx, TILE_W, TILE_H, '#42A5F5');
-  drawDiamondOutline(ctx, TILE_W, TILE_H, '#1E88E5');
+  drawDiamond(ctx, TILE_SIZE, TILE_SIZE, '#42A5F5');
+  drawDiamondOutline(ctx, TILE_SIZE, TILE_SIZE, '#1E88E5');
   ctx.strokeStyle = '#90CAF9';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(TILE_W / 2 + waveOffset, TILE_H / 2 - 2, 6, 0, Math.PI);
+  ctx.arc(TILE_SIZE / 2 + waveOffset, TILE_SIZE / 2 - 2, 6, 0, Math.PI);
   ctx.stroke();
   ctx.beginPath();
-  ctx.arc(TILE_W / 2 - waveOffset * 0.7, TILE_H / 2 + 4, 5, 0, Math.PI);
+  ctx.arc(TILE_SIZE / 2 - waveOffset * 0.7, TILE_SIZE / 2 + 4, 5, 0, Math.PI);
   ctx.stroke();
   return c;
 }

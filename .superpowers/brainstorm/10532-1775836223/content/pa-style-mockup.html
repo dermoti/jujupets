@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>JujuPets — Prison Architect Style Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #3a3a3a; font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #e0e0e0; display: flex; justify-content: center; padding: 16px; }
+
+  #game-container { width: 960px; background: #2a2a2a; border: 2px solid #555; border-radius: 2px; }
+
+  /* Stats bar — utilitarian, dark, functional */
+  #stats-bar {
+    display: flex; align-items: center; gap: 16px; padding: 6px 12px;
+    background: #1a1a1a; border-bottom: 1px solid #444; font-size: 11px; color: #ccc;
+  }
+  .stat { color: #e0e0e0; }
+  .stat-label { color: #888; font-size: 9px; margin-right: 4px; }
+  .stat-value { color: #fff; font-weight: bold; }
+  .stat-money .stat-value { color: #4CAF50; }
+  .stat-rep .stat-value { color: #FFD54F; }
+
+  .toolbar-btn {
+    background: #333; color: #ccc; border: 1px solid #555; padding: 3px 10px;
+    font-size: 10px; cursor: pointer; border-radius: 2px;
+  }
+  .toolbar-btn:hover { background: #444; }
+  .toolbar-btn.active { background: #555; color: #fff; border-color: #888; }
+  #speed-controls { display: flex; gap: 2px; margin-left: auto; }
+  #mute-btn { margin-left: 10px; font-size: 14px; background: none; border: none; color: #888; cursor: pointer; }
+  #mute-btn:hover { color: #fff; }
+
+  /* Main area */
+  #main-area { display: flex; }
+
+  /* Canvas (top-down grid) */
+  #canvas-area { width: 680px; height: 500px; background: #5a7a3a; position: relative; overflow: hidden; cursor: grab; }
+
+  /* Side panel — dark, functional */
+  #side-panel {
+    width: 280px; padding: 10px; background: #222; border-left: 1px solid #444;
+    overflow-y: auto; max-height: 500px; font-size: 10px;
+  }
+  .panel-section { margin-bottom: 10px; }
+  .panel-header { color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #444; }
+
+  .action-btn {
+    display: block; width: 100%; padding: 6px 8px; margin-bottom: 3px;
+    background: #333; color: #ccc; border: 1px solid #555;
+    font-family: inherit; font-size: 10px; cursor: pointer; border-radius: 2px; text-align: left;
+  }
+  .action-btn:hover { background: #444; color: #fff; border-color: #888; }
+
+  .entry { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid #333; font-size: 10px; color: #ccc; }
+  .portrait { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid #555; }
+  .health-bar { display: inline-block; width: 40px; height: 4px; background: #444; border-radius: 1px; overflow: hidden; }
+  .health-fill { height: 100%; border-radius: 1px; }
+
+  /* Event ticker */
+  #event-ticker {
+    padding: 5px 12px; background: #1a1a1a; border-top: 1px solid #444;
+    font-size: 9px; color: #888; min-height: 24px; overflow: hidden; white-space: nowrap;
+  }
+  .ticker-scroll { display: inline-block; animation: scroll 30s linear infinite; }
+  @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-200%); } }
+</style>
+</head>
+<body>
+<div id="game-container">
+
+  <!-- STATS BAR -->
+  <div id="stats-bar">
+    <span class="stat stat-money"><span class="stat-label">GELD</span><span class="stat-value">$1.847</span></span>
+    <span class="stat stat-rep"><span class="stat-label">REP</span><span class="stat-value">34</span></span>
+    <span class="stat"><span class="stat-label">ZEIT</span><span class="stat-value">Jahr 2 — Mai W3</span></span>
+    <div id="speed-controls">
+      <button class="toolbar-btn">⏸</button>
+      <button class="toolbar-btn active">▶</button>
+      <button class="toolbar-btn">▶▶</button>
+      <button class="toolbar-btn">▶▶▶</button>
+    </div>
+    <button id="mute-btn">🔊</button>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div id="main-area">
+
+    <!-- TOP-DOWN CANVAS -->
+    <div id="canvas-area">
+      <svg viewBox="0 0 680 500" style="width:100%;height:100%;">
+        <!-- Grass background -->
+        <rect width="680" height="500" fill="#5a7a3a"/>
+
+        <!-- Grass texture (subtle darker spots) -->
+        <g fill="#4d6d30" opacity="0.3">
+          <circle cx="50" cy="30" r="2"/><circle cx="120" cy="80" r="1.5"/>
+          <circle cx="200" cy="50" r="2"/><circle cx="300" cy="120" r="1.5"/>
+          <circle cx="450" cy="60" r="2"/><circle cx="550" cy="90" r="1"/>
+          <circle cx="100" cy="300" r="2"/><circle cx="350" cy="400" r="1.5"/>
+          <circle cx="600" cy="350" r="2"/><circle cx="500" cy="200" r="1"/>
+        </g>
+
+        <!-- PATHS (concrete/gravel) -->
+        <g fill="#a09080">
+          <!-- Main path from bottom to building -->
+          <rect x="200" y="350" width="32" height="150"/>
+          <!-- Horizontal path -->
+          <rect x="50" y="340" width="580" height="32"/>
+          <!-- Path to right enclosures -->
+          <rect x="420" y="140" width="32" height="200"/>
+        </g>
+
+        <!-- BUILDING (top-down, thick walls) -->
+        <g>
+          <!-- Outer walls — thick dark outline -->
+          <rect x="60" y="120" width="300" height="220" fill="#c8b8a0" stroke="#333" stroke-width="4"/>
+
+          <!-- Inner rooms — divided by thinner walls -->
+          <!-- Reception -->
+          <rect x="62" y="280" width="148" height="58" fill="#d4c8b0" stroke="#555" stroke-width="2"/>
+          <text x="136" y="312" text-anchor="middle" fill="#888" font-size="8">EMPFANG</text>
+
+          <!-- Cages room -->
+          <rect x="62" y="122" width="148" height="156" fill="#d0c4a8" stroke="#555" stroke-width="2"/>
+          <text x="136" y="200" text-anchor="middle" fill="#888" font-size="8">KÄFIGE</text>
+
+          <!-- Treatment room -->
+          <rect x="212" y="122" width="146" height="100" fill="#d8d0c0" stroke="#555" stroke-width="2"/>
+          <text x="285" y="175" text-anchor="middle" fill="#888" font-size="8">BEHANDLUNG</text>
+
+          <!-- Storage -->
+          <rect x="212" y="224" width="146" height="114" fill="#ccc0a8" stroke="#555" stroke-width="2"/>
+          <text x="285" y="285" text-anchor="middle" fill="#888" font-size="8">LAGER</text>
+
+          <!-- Door openings -->
+          <rect x="196" y="330" width="24" height="12" fill="#c8b8a0"/>
+          <rect x="196" y="192" width="16" height="24" fill="#d0c4a8"/>
+        </g>
+
+        <!-- FURNITURE (simple PA-style shapes with outlines) -->
+
+        <!-- Counter in reception -->
+        <rect x="100" y="295" width="70" height="14" rx="1" fill="#8D6E63" stroke="#333" stroke-width="2"/>
+
+        <!-- Cages in cage room -->
+        <g stroke="#555" stroke-width="1.5" fill="#ddd">
+          <rect x="75" y="135" width="24" height="20" rx="1"/>
+          <rect x="105" y="135" width="24" height="20" rx="1"/>
+          <rect x="135" y="135" width="24" height="20" rx="1"/>
+          <rect x="75" y="165" width="24" height="20" rx="1"/>
+          <rect x="105" y="165" width="24" height="20" rx="1"/>
+          <rect x="135" y="165" width="24" height="20" rx="1"/>
+        </g>
+        <!-- Cage doors (small gaps) -->
+        <g fill="#d0c4a8">
+          <rect x="83" y="155" width="8" height="2"/>
+          <rect x="113" y="155" width="8" height="2"/>
+          <rect x="143" y="155" width="8" height="2"/>
+          <rect x="83" y="185" width="8" height="2"/>
+          <rect x="113" y="185" width="8" height="2"/>
+          <rect x="143" y="185" width="8" height="2"/>
+        </g>
+
+        <!-- Treatment table -->
+        <rect x="240" y="145" width="40" height="20" rx="1" fill="#bbb" stroke="#333" stroke-width="2"/>
+
+        <!-- Shelves in storage -->
+        <rect x="225" y="240" width="50" height="10" fill="#8D6E63" stroke="#333" stroke-width="1.5"/>
+        <rect x="225" y="260" width="50" height="10" fill="#8D6E63" stroke="#333" stroke-width="1.5"/>
+        <!-- Food bags -->
+        <rect x="228" y="234" width="10" height="8" fill="#FFF9C4" stroke="#333" stroke-width="1"/>
+        <rect x="242" y="234" width="10" height="8" fill="#FFCC80" stroke="#333" stroke-width="1"/>
+
+        <!-- OUTDOOR ENCLOSURES (fenced areas) -->
+
+        <!-- Dog run -->
+        <rect x="420" y="40" width="220" height="100" fill="#6a8a4a" stroke="#333" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="530" y="32" text-anchor="middle" fill="#fff" font-size="9" opacity="0.6">HUNDE-AUSLAUF</text>
+        <!-- Fence posts -->
+        <g fill="#5D4037">
+          <rect x="418" y="38" width="4" height="4"/><rect x="478" y="38" width="4" height="4"/>
+          <rect x="538" y="38" width="4" height="4"/><rect x="598" y="38" width="4" height="4"/>
+          <rect x="636" y="38" width="4" height="4"/>
+          <rect x="418" y="136" width="4" height="4"/><rect x="636" y="136" width="4" height="4"/>
+        </g>
+
+        <!-- Cat enclosure -->
+        <rect x="420" y="160" width="120" height="80" fill="#5d7a3a" stroke="#333" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="480" y="152" text-anchor="middle" fill="#fff" font-size="9" opacity="0.6">KATZEN</text>
+
+        <!-- Small pet area -->
+        <rect x="550" y="160" width="100" height="80" fill="#5d7a3a" stroke="#333" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="600" y="152" text-anchor="middle" fill="#fff" font-size="9" opacity="0.6">KLEINTIERE</text>
+
+        <!-- Bird aviary -->
+        <rect x="480" y="260" width="100" height="70" fill="#5d7a3a" stroke="#333" stroke-width="2" stroke-dasharray="4,2"/>
+        <text x="530" y="252" text-anchor="middle" fill="#fff" font-size="9" opacity="0.6">VÖGEL</text>
+
+        <!-- Food/water bowls -->
+        <g>
+          <circle cx="470" cy="80" r="5" fill="#FF8A65" stroke="#333" stroke-width="1.5"/>
+          <circle cx="490" cy="80" r="5" fill="#64B5F6" stroke="#333" stroke-width="1.5"/>
+          <circle cx="460" cy="195" r="4" fill="#FF8A65" stroke="#333" stroke-width="1.5"/>
+          <circle cx="476" cy="195" r="4" fill="#64B5F6" stroke="#333" stroke-width="1.5"/>
+        </g>
+
+        <!-- TREES (simple circles with trunk) -->
+        <g>
+          <rect x="18" y="60" width="4" height="12" fill="#5D4037"/>
+          <circle cx="20" cy="52" r="14" fill="#4a6a2a" stroke="#333" stroke-width="2"/>
+          <rect x="18" y="420" width="4" height="12" fill="#5D4037"/>
+          <circle cx="20" cy="412" r="14" fill="#4a6a2a" stroke="#333" stroke-width="2"/>
+          <rect x="648" y="420" width="4" height="12" fill="#5D4037"/>
+          <circle cx="650" cy="412" r="14" fill="#4a6a2a" stroke="#333" stroke-width="2"/>
+        </g>
+
+        <!-- WATER FEATURE -->
+        <ellipse cx="35" cy="180" rx="18" ry="12" fill="#5C9CD6" stroke="#333" stroke-width="1.5"/>
+        <ellipse cx="35" cy="178" rx="12" ry="7" fill="#7CB8E8" opacity="0.5"/>
+
+        <!-- BENCH -->
+        <rect x="160" y="365" width="30" height="6" fill="#8D6E63" stroke="#333" stroke-width="1.5"/>
+
+        <!-- ============== CHARACTERS (Prison Architect style) ============== -->
+
+        <!-- DOG (big head blob, stubby body, thick outline) -->
+        <g transform="translate(470, 70)">
+          <ellipse cx="0" cy="6" rx="6" ry="3" fill="rgba(0,0,0,0.15)"/>
+          <!-- Body -->
+          <rect x="-5" y="-2" width="10" height="8" rx="3" fill="#C8A070" stroke="#333" stroke-width="1.5"/>
+          <!-- Head (big!) -->
+          <circle cx="0" cy="-8" r="6" fill="#C8A070" stroke="#333" stroke-width="1.5"/>
+          <!-- Ears -->
+          <ellipse cx="-5" cy="-12" rx="3" ry="2" fill="#A07848" stroke="#333" stroke-width="1"/>
+          <ellipse cx="5" cy="-12" rx="3" ry="2" fill="#A07848" stroke="#333" stroke-width="1"/>
+          <!-- Eyes (dots) -->
+          <circle cx="-2" cy="-8" r="1" fill="#333"/>
+          <circle cx="2" cy="-8" r="1" fill="#333"/>
+          <!-- Tail -->
+          <rect x="5" y="-1" width="5" height="2" rx="1" fill="#C8A070" stroke="#333" stroke-width="1"/>
+          <!-- Name -->
+          <text x="0" y="14" text-anchor="middle" fill="#fff" font-size="7" opacity="0.8">Buddy</text>
+          <!-- Heart particle -->
+          <text x="8" y="-14" fill="#E53935" font-size="8">♥</text>
+        </g>
+
+        <!-- DOG 2 -->
+        <g transform="translate(540, 100)">
+          <rect x="-5" y="-2" width="10" height="8" rx="3" fill="#B89060" stroke="#333" stroke-width="1.5"/>
+          <circle cx="0" cy="-8" r="6" fill="#B89060" stroke="#333" stroke-width="1.5"/>
+          <ellipse cx="-5" cy="-12" rx="3" ry="2" fill="#987040" stroke="#333" stroke-width="1"/>
+          <ellipse cx="5" cy="-12" rx="3" ry="2" fill="#987040" stroke="#333" stroke-width="1"/>
+          <circle cx="-2" cy="-8" r="1" fill="#333"/>
+          <circle cx="2" cy="-8" r="1" fill="#333"/>
+          <text x="0" y="14" text-anchor="middle" fill="#fff" font-size="7" opacity="0.8">Rex</text>
+        </g>
+
+        <!-- CAT -->
+        <g transform="translate(460, 190)">
+          <rect x="-4" y="-1" width="8" height="6" rx="2" fill="#9E9E9E" stroke="#333" stroke-width="1.5"/>
+          <circle cx="0" cy="-6" r="5" fill="#9E9E9E" stroke="#333" stroke-width="1.5"/>
+          <!-- Pointy ears -->
+          <polygon points="-5,-9 -3,-14 -1,-9" fill="#BDBDBD" stroke="#333" stroke-width="1"/>
+          <polygon points="1,-9 3,-14 5,-9" fill="#BDBDBD" stroke="#333" stroke-width="1"/>
+          <!-- Eyes (green dots) -->
+          <circle cx="-2" cy="-6" r="1" fill="#4CAF50"/>
+          <circle cx="2" cy="-6" r="1" fill="#4CAF50"/>
+          <!-- Tail -->
+          <path d="M4,0 Q10,-2 8,4" stroke="#9E9E9E" stroke-width="2" fill="none"/>
+          <text x="0" y="12" text-anchor="middle" fill="#fff" font-size="7" opacity="0.8">Mimi</text>
+        </g>
+
+        <!-- BIRD -->
+        <g transform="translate(520, 285)">
+          <rect x="-3" y="0" width="6" height="4" rx="2" fill="#4FC3F7" stroke="#333" stroke-width="1.5"/>
+          <circle cx="0" cy="-3" r="4" fill="#4FC3F7" stroke="#333" stroke-width="1.5"/>
+          <!-- Beak -->
+          <polygon points="4,-3 8,-2 4,-1" fill="#FF9800" stroke="#333" stroke-width="0.5"/>
+          <circle cx="-1" cy="-3" r="0.8" fill="#333"/>
+          <circle cx="1.5" cy="-3" r="0.8" fill="#333"/>
+          <text x="0" y="10" text-anchor="middle" fill="#fff" font-size="7" opacity="0.8">Kiwi</text>
+          <text x="6" y="-8" fill="#7E57C2" font-size="8">♪</text>
+        </g>
+
+        <!-- STAFF: Caretaker (PA style — big head, green uniform, thick outline) -->
+        <g transform="translate(130, 160)">
+          <ellipse cx="0" cy="12" rx="5" ry="2" fill="rgba(0,0,0,0.15)"/>
+          <!-- Body (green uniform) -->
+          <rect x="-5" y="0" width="10" height="12" rx="2" fill="#4CAF50" stroke="#333" stroke-width="1.5"/>
+          <!-- Legs (stubby) -->
+          <rect x="-4" y="12" width="3" height="4" rx="1" fill="#795548" stroke="#333" stroke-width="1"/>
+          <rect x="1" y="12" width="3" height="4" rx="1" fill="#795548" stroke="#333" stroke-width="1"/>
+          <!-- Head (BIG, PA-style) -->
+          <circle cx="0" cy="-6" r="7" fill="#FFCC80" stroke="#333" stroke-width="1.5"/>
+          <!-- Hair -->
+          <path d="M-7,-7 Q-7,-14 0,-13 Q7,-14 7,-7" fill="#5D4037" stroke="#333" stroke-width="1"/>
+          <!-- Eyes (simple dots) -->
+          <circle cx="-2" cy="-6" r="1.2" fill="#333"/>
+          <circle cx="3" cy="-6" r="1.2" fill="#333"/>
+          <!-- Sparkle -->
+          <text x="8" y="-3" fill="#FFF" font-size="7">✦</text>
+        </g>
+
+        <!-- STAFF: Vet (white coat, PA style) -->
+        <g transform="translate(265, 160)">
+          <ellipse cx="0" cy="12" rx="5" ry="2" fill="rgba(0,0,0,0.15)"/>
+          <rect x="-5" y="0" width="10" height="12" rx="2" fill="#ECEFF1" stroke="#333" stroke-width="1.5"/>
+          <!-- Red cross on coat -->
+          <rect x="-1" y="3" width="2" height="6" fill="#E53935"/>
+          <rect x="-3" y="5" width="6" height="2" fill="#E53935"/>
+          <rect x="-4" y="12" width="3" height="4" rx="1" fill="#90CAF9" stroke="#333" stroke-width="1"/>
+          <rect x="1" y="12" width="3" height="4" rx="1" fill="#90CAF9" stroke="#333" stroke-width="1"/>
+          <circle cx="0" cy="-6" r="7" fill="#FFCC80" stroke="#333" stroke-width="1.5"/>
+          <path d="M-7,-7 Q-7,-14 0,-13 Q7,-14 7,-7" fill="#333" stroke="#333" stroke-width="1"/>
+          <circle cx="-2" cy="-6" r="1.2" fill="#333"/>
+          <circle cx="3" cy="-6" r="1.2" fill="#333"/>
+        </g>
+
+        <!-- Flower bed -->
+        <g transform="translate(175, 115)">
+          <rect x="-20" y="0" width="40" height="8" rx="1" fill="#6D4C41" stroke="#333" stroke-width="1"/>
+          <circle cx="-12" cy="-2" r="3" fill="#E91E63" stroke="#333" stroke-width="0.8"/>
+          <circle cx="-4" cy="-2" r="3" fill="#FF9800" stroke="#333" stroke-width="0.8"/>
+          <circle cx="4" cy="-2" r="3" fill="#FFEB3B" stroke="#333" stroke-width="0.8"/>
+          <circle cx="12" cy="-2" r="3" fill="#9C27B0" stroke="#333" stroke-width="0.8"/>
+        </g>
+
+        <!-- Selection highlight (PA-style blue outline on selected entity) -->
+        <rect x="463" y="55" width="16" height="24" fill="none" stroke="#4FC3F7" stroke-width="2" stroke-dasharray="3,2" rx="2"/>
+
+      </svg>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div id="side-panel">
+      <div class="panel-section">
+        <div class="panel-header">Personal</div>
+        <div class="entry">
+          <div class="portrait" style="background:#4CAF50;"></div>
+          <div>
+            <div>Pfleger Max <span style="color:#888;">Lv.2</span></div>
+            <div style="color:#888;font-size:8px;">Energie: <span class="health-bar"><span class="health-fill" style="width:67%;background:#4CAF50;"></span></span> 67%</div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="portrait" style="background:#ECEFF1;border-color:#E53935;"></div>
+          <div>
+            <div>Tierarzt Mia <span style="color:#888;">Lv.1</span></div>
+            <div style="color:#888;font-size:8px;">Energie: <span class="health-bar"><span class="health-fill" style="width:89%;background:#4CAF50;"></span></span> 89%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-header">Tiere (3/6)</div>
+        <div class="entry">
+          <div class="portrait" style="background:#C8A070;"></div>
+          <div style="flex:1;">
+            <div>Buddy <span style="color:#888;">Hund</span></div>
+            <div style="display:flex;gap:8px;font-size:8px;color:#888;">
+              <span>❤️ <span class="health-bar"><span class="health-fill" style="width:72%;background:#E53935;"></span></span></span>
+              <span>😊 <span class="health-bar"><span class="health-fill" style="width:81%;background:#FFD54F;"></span></span></span>
+            </div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="portrait" style="background:#9E9E9E;"></div>
+          <div style="flex:1;">
+            <div>Mimi <span style="color:#888;">Katze</span></div>
+            <div style="display:flex;gap:8px;font-size:8px;color:#888;">
+              <span>❤️ <span class="health-bar"><span class="health-fill" style="width:85%;background:#E53935;"></span></span></span>
+              <span>😊 <span class="health-bar"><span class="health-fill" style="width:64%;background:#FFD54F;"></span></span></span>
+            </div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="portrait" style="background:#4FC3F7;"></div>
+          <div style="flex:1;">
+            <div>Kiwi <span style="color:#888;">Vogel</span></div>
+            <div style="display:flex;gap:8px;font-size:8px;color:#888;">
+              <span>❤️ <span class="health-bar"><span class="health-fill" style="width:60%;background:#E53935;"></span></span></span>
+              <span>😊 <span class="health-bar"><span class="health-fill" style="width:45%;background:#FF9800;"></span></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-header">Bewerber</div>
+        <div class="entry">
+          <span>Fam. Klein — <span style="color:#4CAF50;">Match: 82%</span> → Buddy</span>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <button class="action-btn">📋 Aufnehmen</button>
+        <button class="action-btn">🤝 Vermitteln</button>
+        <button class="action-btn">🛒 Einkaufen</button>
+        <button class="action-btn">👥 Personal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENT TICKER -->
+  <div id="event-ticker">
+    <span class="ticker-scroll">
+      🐕 Buddy aufgenommen! &nbsp;&nbsp;|&nbsp;&nbsp; 👤 Pfleger Max Lv.2! &nbsp;&nbsp;|&nbsp;&nbsp; 🎉 Adoptionsfest in 2 Wochen &nbsp;&nbsp;|&nbsp;&nbsp; 💰 Spende: $150 &nbsp;&nbsp;|&nbsp;&nbsp; ✅ Inspektion bestanden
+    </span>
+  </div>
+
+</div>
+</body>
+</html>
