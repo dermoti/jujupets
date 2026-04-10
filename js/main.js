@@ -1,3 +1,4 @@
+import { createAudioEngine } from './audio.js';
 import { createEngine } from './engine.js';
 import { createNewState, loadState, saveState } from './state.js';
 import { createRenderer } from './renderer.js';
@@ -25,6 +26,17 @@ const camera = createCamera(canvas.width, canvas.height, worldSize.w, worldSize.
 const buildingCenter = worldToScreen(7, 13, TILE_W, TILE_H);
 camera.centerOn(buildingCenter.x + worldSize.w / 4, buildingCenter.y);
 
+const audio = createAudioEngine();
+
+function resumeAudio() {
+  audio.resume();
+  audio.playMusic();
+  document.removeEventListener('click', resumeAudio);
+  document.removeEventListener('keydown', resumeAudio);
+}
+document.addEventListener('click', resumeAudio);
+document.addEventListener('keydown', resumeAudio);
+
 const engine = createEngine();
 engine.setMsPerTick(BALANCING.msPerTick);
 
@@ -41,6 +53,27 @@ const ui = createUI(state, {
       case 'staff':  showStaffDialog();  break;
     }
   },
+  onVolumeChange(channel, value) {
+    if (channel === 'music') audio.setMusicVolume(value);
+    if (channel === 'sfx') audio.setSfxVolume(value);
+    if (channel === 'ambient') audio.setAmbientVolume(value);
+  },
+  onMuteToggle(muted) {
+    audio.setMasterMute(muted);
+  },
+  onButtonClick() {
+    audio.playSfx('click');
+  },
+  onDialogClose() {
+    audio.playSfx('dialog_close');
+  },
+});
+
+ui.updateVolumeUI({
+  musicVolume: audio._getMusicVolume(),
+  sfxVolume: audio._getSfxVolume(),
+  ambientVolume: audio._getAmbientVolume(),
+  muted: audio.isMuted,
 });
 
 // Camera controls
@@ -91,6 +124,19 @@ engine.onTick = (ticks) => {
     if (animal.species === 'bird' && Math.random() < 0.007) {
       particleSystem.emit('note', sx, sy, 1);
     }
+    // Animal sound triggers
+    if (animal.species === 'dog' && Math.random() < 0.003) {
+      audio.playSfx('bark');
+    }
+    if (animal.species === 'cat' && Math.random() < 0.002) {
+      audio.playSfx('meow');
+    }
+    if (animal.species === 'bird' && Math.random() < 0.005) {
+      audio.playSfx('chirp');
+    }
+    if ((animal.species === 'rabbit' || animal.species === 'smallpet') && Math.random() < 0.002) {
+      audio.playSfx('squeak');
+    }
   }
   for (const staff of state.staff) {
     if (!staff._working) continue;
@@ -122,7 +168,9 @@ engine.onRender = (dt) => {
 };
 
 function showIntakeDialog() {
+  audio.playSfx('dialog_open');
   if (state.animals.length >= state.maxAnimals) {
+    audio.playSfx('alert');
     ui.showDialog('Kein Platz', 'Das Tierheim ist voll! Vermittle erst Tiere oder erweitere.', [
       { label: 'OK', onClick() {} }
     ]);
@@ -139,6 +187,7 @@ function showIntakeDialog() {
       const key = btn.dataset.species;
       const cost = Math.floor(SPECIES[key].baseAdoptionFee * 0.3);
       if (state.money < cost) {
+        audio.playSfx('alert');
         ui.showDialog('Zu teuer', 'Nicht genug Geld.', [{ label: 'OK', onClick() {} }]);
         return;
       }
@@ -153,11 +202,14 @@ function showIntakeDialog() {
 }
 
 function showAdoptDialog() {
+  audio.playSfx('dialog_open');
   if (state.owners.length === 0) {
+    audio.playSfx('alert');
     ui.showDialog('Keine Bewerber', 'Aktuell keine Adoptionsbewerber. Steigere deine Reputation!', [{ label: 'OK', onClick() {} }]);
     return;
   }
   if (state.animals.length === 0) {
+    audio.playSfx('alert');
     ui.showDialog('Keine Tiere', 'Keine Tiere im Tierheim.', [{ label: 'OK', onClick() {} }]);
     return;
   }
@@ -193,6 +245,8 @@ function showAnimalSelectDialog(owner) {
       if (!animal) return;
       const score = calculateMatchScore(animal, owner, matchmakerBonus);
       const result = executeAdoption(state, animal, owner, score);
+      audio.playSfx('adopt_fanfare');
+      audio.playSfx('cha_ching');
       const adoptPos = movementSystem.getPosition(animal.id);
       if (adoptPos) {
         const adoptScreen = worldToScreen(adoptPos.col, adoptPos.row, TILE_W, TILE_H);
@@ -206,6 +260,7 @@ function showAnimalSelectDialog(owner) {
 }
 
 function showShopDialog() {
+  audio.playSfx('dialog_open');
   const content = `
     <button class="action-btn" data-buy="food">Futter-Vorrat ($${BALANCING.dailyFoodCost * 7})</button>
     <button class="action-btn" data-buy="medicine">Medizin-Vorrat ($${BALANCING.dailyMedicineCost * 7})</button>
@@ -232,6 +287,7 @@ function showShopDialog() {
 }
 
 function showStaffDialog() {
+  audio.playSfx('dialog_open');
   let content = '<div style="margin-bottom:8px"><b>Personal verwalten:</b></div>';
   content += '<div style="margin-bottom:8px"><u>Einstellen:</u></div>';
   for (const roleKey of state.unlockedRoles) {

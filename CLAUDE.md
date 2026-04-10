@@ -36,6 +36,7 @@ ES modules throughout (`<script type="module">`). Canvas (640x480) for pixel-art
 - `js/sprites.js` — animation state controller for frame timing and animation selection
 - `js/movement.js` — entity movement: animal random-walk within zones, staff waypoint navigation along paths
 - `js/particles.js` — particle effects: hearts (happy), stars (adoption), notes (birds), sparkles (working/feeding)
+- `js/audio.js` — procedural audio engine: Web Audio API chiptune sequencer, 10 SFX, ambient layer, 3-channel volume + master mute
 
 ## Testing
 

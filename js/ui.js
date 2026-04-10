@@ -42,6 +42,7 @@ export function createUI(state, callbacks) {
       callbacks.onSetSpeed(speed);
       document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      callbacks.onButtonClick?.();
     });
   });
 
@@ -49,8 +50,59 @@ export function createUI(state, callbacks) {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
       callbacks.onAction(action);
+      callbacks.onButtonClick?.();
     });
   });
+
+  // Volume popup toggle
+  const muteBtn = document.getElementById('mute-btn');
+  const volumePopup = document.getElementById('volume-popup');
+  const volMusic = document.getElementById('vol-music');
+  const volSfx = document.getElementById('vol-sfx');
+  const volAmbient = document.getElementById('vol-ambient');
+  const volMuteCheckbox = document.getElementById('vol-mute');
+
+  if (muteBtn && volumePopup) {
+    muteBtn.addEventListener('click', () => {
+      volumePopup.classList.toggle('hidden');
+    });
+
+    // Close popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!volumePopup.contains(e.target) && e.target !== muteBtn) {
+        volumePopup.classList.add('hidden');
+      }
+    });
+  }
+
+  if (volMusic) {
+    volMusic.addEventListener('input', () => {
+      callbacks.onVolumeChange?.('music', parseInt(volMusic.value) / 100);
+    });
+  }
+  if (volSfx) {
+    volSfx.addEventListener('input', () => {
+      callbacks.onVolumeChange?.('sfx', parseInt(volSfx.value) / 100);
+    });
+  }
+  if (volAmbient) {
+    volAmbient.addEventListener('input', () => {
+      callbacks.onVolumeChange?.('ambient', parseInt(volAmbient.value) / 100);
+    });
+  }
+  if (volMuteCheckbox) {
+    volMuteCheckbox.addEventListener('change', () => {
+      callbacks.onMuteToggle?.(volMuteCheckbox.checked);
+    });
+  }
+
+  function updateVolumeUI(settings) {
+    if (volMusic) volMusic.value = Math.round(settings.musicVolume * 100);
+    if (volSfx) volSfx.value = Math.round(settings.sfxVolume * 100);
+    if (volAmbient) volAmbient.value = Math.round(settings.ambientVolume * 100);
+    if (volMuteCheckbox) volMuteCheckbox.checked = settings.muted;
+    if (muteBtn) muteBtn.textContent = settings.muted ? '\u{1F507}' : '\u{1F50A}';
+  }
 
   function update(state) {
     elements.money.textContent = formatMoney(state.money);
@@ -92,7 +144,8 @@ export function createUI(state, callbacks) {
 
   function hideDialog() {
     elements.dialogOverlay.classList.add('hidden');
+    callbacks.onDialogClose?.();
   }
 
-  return { update, showDialog, hideDialog };
+  return { update, showDialog, hideDialog, updateVolumeUI };
 }

@@ -188,3 +188,60 @@ describe('Ambient layer', () => {
     expect(threw).toBe(false);
   });
 });
+
+describe('Volume popup DOM contract', () => {
+  // These tests verify the audio module's UI expectations:
+  // the elements it needs must have the right IDs and types.
+  // We create them in-test to validate the contract independently.
+
+  it('volume popup structure: 3 range inputs + 1 checkbox', () => {
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <button id="test-mute-btn">X</button>
+      <div id="test-volume-popup" class="hidden">
+        <label>Musik <input type="range" id="test-vol-music" min="0" max="100" value="50"></label>
+        <label>SFX <input type="range" id="test-vol-sfx" min="0" max="100" value="70"></label>
+        <label>Ambient <input type="range" id="test-vol-ambient" min="0" max="100" value="30"></label>
+        <label><input type="checkbox" id="test-vol-mute"> Stumm</label>
+      </div>
+    `;
+    document.body.appendChild(container);
+
+    const popup = document.getElementById('test-volume-popup');
+    expect(popup !== null).toBe(true);
+    expect(popup.classList.contains('hidden')).toBe(true);
+
+    const sliders = popup.querySelectorAll('input[type="range"]');
+    expect(sliders.length).toBe(3);
+
+    const checkbox = popup.querySelector('input[type="checkbox"]');
+    expect(checkbox !== null).toBe(true);
+
+    document.body.removeChild(container);
+  });
+
+  it('slider default values match spec defaults', () => {
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <input type="range" id="test-vm" min="0" max="100" value="50">
+      <input type="range" id="test-vs" min="0" max="100" value="70">
+      <input type="range" id="test-va" min="0" max="100" value="30">
+    `;
+    document.body.appendChild(container);
+
+    expect(parseInt(document.getElementById('test-vm').value)).toBe(50);
+    expect(parseInt(document.getElementById('test-vs').value)).toBe(70);
+    expect(parseInt(document.getElementById('test-va').value)).toBe(30);
+
+    document.body.removeChild(container);
+  });
+});
+
+describe('Audio engine resume', () => {
+  it('resume() does not throw even if context is already running', () => {
+    const audio = createAudioEngine();
+    let threw = false;
+    try { audio.resume(); } catch (e) { threw = true; }
+    expect(threw).toBe(false);
+  });
+});

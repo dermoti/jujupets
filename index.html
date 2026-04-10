@@ -18,6 +18,13 @@
         <button data-speed="2" class="speed-btn">▶▶</button>
         <button data-speed="3" class="speed-btn">▶▶▶</button>
       </div>
+      <button id="mute-btn" title="Lautstärke">&#x1f50a;</button>
+      <div id="volume-popup" class="hidden">
+        <label>Musik <input type="range" id="vol-music" min="0" max="100" value="50"></label>
+        <label>SFX <input type="range" id="vol-sfx" min="0" max="100" value="70"></label>
+        <label>Ambient <input type="range" id="vol-ambient" min="0" max="100" value="30"></label>
+        <label><input type="checkbox" id="vol-mute"> Stumm</label>
+      </div>
     </div>
     <div id="main-area">
       <canvas id="shelter-canvas" width="640" height="480"></canvas>

@@ -34,6 +34,7 @@ body {
   border-bottom: 3px solid #8B4513;
   color: #4E342E;
   font-size: 9px;
+  position: relative;
 }
 
 #stats-bar span {
@@ -223,4 +224,71 @@ body {
   border-bottom: 1px dotted #D7A86E;
   font-size: 8px;
   line-height: 1.6;
+}
+
+/* Mute button */
+#mute-btn {
+  background: linear-gradient(180deg, #A0724A, #8B4513);
+  color: #FFF8E1;
+  border: 2px solid #5D4037;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  margin-left: 8px;
+  line-height: 1;
+}
+
+#mute-btn:hover {
+  background: linear-gradient(180deg, #C49155, #A0724A);
+}
+
+/* Volume popup */
+#volume-popup {
+  position: absolute;
+  top: 38px;
+  right: 14px;
+  background: linear-gradient(180deg, #FFF8E1, #FFECB3);
+  border: 3px solid #8B4513;
+  border-radius: 6px;
+  padding: 12px 14px;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  min-width: 180px;
+}
+
+#volume-popup.hidden {
+  display: none;
+}
+
+#volume-popup label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 8px;
+  color: #4E342E;
+  white-space: nowrap;
+}
+
+#volume-popup label:last-child {
+  margin-bottom: 0;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed #C49155;
+}
+
+#volume-popup input[type="range"] {
+  width: 100px;
+  accent-color: #8B4513;
+  cursor: pointer;
+}
+
+#volume-popup input[type="checkbox"] {
+  accent-color: #8B4513;
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
 }
