@@ -264,6 +264,8 @@ export function createAudioEngine() {
       const LOOKAHEAD      = 0.1;                 // seconds ahead to schedule
       const SCHEDULE_MS    = 25;                  // scheduler tick interval
       const TOTAL_BEATS    = 64;                  // 16 bars × 4 beats
+      const BEATS_PER_BAR  = 4;
+      const BARS           = TOTAL_BEATS / BEATS_PER_BAR; // 16
 
       // C major pentatonic – melody (square wave)
       // freq, startBeat (0-based within 64-beat loop), durationBeats
@@ -341,11 +343,6 @@ export function createAudioEngine() {
         { f: 523, b: 63,   d: 2.0  },
       ];
 
-      // Bass notes: C3-F3-G3-Am(A3) whole-note pattern (triangle wave)
-      // One root per bar (every 4 beats), cycling over 16 bars
-      const BASS_ROOTS = [131, 175, 196, 220, 131, 175, 196, 220,
-                          131, 175, 196, 220, 131, 175, 196, 220];
-
       // Build a lookup map: beat → list of events
       const beatEvents = {};
 
@@ -356,16 +353,13 @@ export function createAudioEngine() {
         beatEvents[b].push({ type: 'melody', freq: note.f, dur: note.d * BEAT_DURATION });
       }
 
-      // Populate bass events (whole notes, once every 4 beats)
-      for (let bar = 0; bar < 16; bar++) {
-        const beat = bar * 4;
-        // second half of the loop (bars 16-31) repeats the same progression
-        const rootFreq = BASS_ROOTS[bar % 16];
-        for (let half = 0; half < 2; half++) {
-          const b = beat + half * 32;  // bar in first 32, same bar in second 32
-          if (!beatEvents[b]) beatEvents[b] = [];
-          beatEvents[b].push({ type: 'bass', freq: rootFreq, dur: 4 * BEAT_DURATION });
-        }
+      // Bass: one whole note per bar, cycling C-F-G-Am
+      const bassRoots = [131, 175, 196, 220]; // C3, F3, G3, A3
+      for (let bar = 0; bar < BARS; bar++) {
+        const beat = bar * BEATS_PER_BAR;
+        const freq = bassRoots[bar % 4];
+        if (!beatEvents[beat]) beatEvents[beat] = [];
+        beatEvents[beat].push({ type: 'bass', freq, dur: BEAT_DURATION * BEATS_PER_BAR });
       }
 
       // Hi-hat on every half-beat (0, 0.5, 1, 1.5 …) – stored as fractional keys but we
@@ -509,6 +503,7 @@ export function createAudioEngine() {
       }
 
       function scheduleBirdChirp() {
+        if (!ambientNodes) return; // guard against race with stopMusic
         chirpBird();
         const nextDelay = 5000 + Math.random() * 5000;
         ambientNodes.birdTimer = setTimeout(scheduleBirdChirp, nextDelay);
