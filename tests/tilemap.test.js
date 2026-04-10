@@ -60,20 +60,20 @@ describe('ZONES', () => {
   });
 });
 
-describe('tile type coverage', () => {
-  it('returns wall_back for building top row', () => {
+describe('tile type coverage (PA unified walls)', () => {
+  it('returns wall for building top row', () => {
     const map = createTileMap();
-    expect(map.getTile(5, 8)).toBe('wall_back');
+    expect(map.getTile(5, 8)).toBe('wall');
   });
 
-  it('returns wall_left for building left edge', () => {
+  it('returns wall for building left edge', () => {
     const map = createTileMap();
-    expect(map.getTile(2, 12)).toBe('wall_left');
+    expect(map.getTile(2, 12)).toBe('wall');
   });
 
-  it('returns wall_right for building right edge', () => {
+  it('returns wall for building right edge', () => {
     const map = createTileMap();
-    expect(map.getTile(11, 12)).toBe('wall_right');
+    expect(map.getTile(11, 12)).toBe('wall');
   });
 
   it('returns fence for dog run boundary', () => {

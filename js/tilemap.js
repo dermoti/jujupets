@@ -133,9 +133,9 @@ function computeDecoMap(tiles) {
 function computeTileType(col, row) {
   // Building interior
   if (inRect(col, row, ZONES.building)) {
-    if (row === ZONES.building.minRow) return 'wall_back';
-    if (col === ZONES.building.minCol) return 'wall_left';
-    if (col === ZONES.building.maxCol) return 'wall_right';
+    if (row === ZONES.building.minRow) return 'wall';
+    if (col === ZONES.building.minCol) return 'wall';
+    if (col === ZONES.building.maxCol) return 'wall';
     return 'floor';
   }
 
