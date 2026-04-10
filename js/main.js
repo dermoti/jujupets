@@ -161,6 +161,7 @@ function showAnimalSelectDialog(owner) {
       if (!animal) return;
       const score = calculateMatchScore(animal, owner, matchmakerBonus);
       const result = executeAdoption(state, animal, owner, score);
+      movementSystem.removeEntity(animal.id);
       state.tickerMessages.push(`${animal.name} vermittelt an ${owner.name}! Match: ${Math.floor(score)}%, Geb\u00fchr: $${result.fee}`);
       ui.hideDialog();
     });
